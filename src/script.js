@@ -1,48 +1,47 @@
-let myModel;
+// let myModel;
 let mapa;
-let zoom;
-let n;
 let pAngle;
+let vField;
+let arrow;
+
 
 function preload() {
   myFont = loadFont("fonts/Roboto/Roboto-Medium.ttf")
-  myModel = loadModel('obj/fish.obj', true);
+  // myModel = loadModel('obj/fish.obj', true);
+  arrow = loadImage("img/arrow.png")
   mapa = loadImage("img/map.png")
 }
 
 function setup() {
-  createCanvas(600, 900, WEBGL);
+  canvas = createCanvas(600, 900, WEBGL);
   textFont(myFont)
   textSize(12)
-  zoom = 1;
-  n = 20;
   pAngle = 0;
+  vField = new VectorField(-300, -450, 20, width, height);//_orgX, _orgY, _density, _w, _h
   smooth();
   colorMode(HSB)
 }
 
 function draw() {
-  background(200);
+  background(0);
   // rotate
   rotateX(map(mouseY, 0, width, -PI / 2, PI / 2));
   rotateZ(map(mouseX, 0, width, -PI, PI));
-  //scale(zoom)
-  settingMouseCamera2(200);
-  showAxes()
-  let ghost = fantasma(200);
-  vectorField(-300, -300, ghost.x, ghost.y)
+  // camera
+  settingMouseCamera(200);
+  //showAxes()
+  // vectorfield
+
+  vField.show(fantasma(200))
+  //vField.showSink(fantasma(200))
   // mapa
   image(mapa, -828, -411)
+
+
 }
+
 
 function settingMouseCamera(proximity) {
-  let nMouse = getNormalizedMouse();
-  let nVect = get3DVector(nMouse.x, nMouse.y)
-  nVect.mult(proximity)
-  camera(nVect.x, nVect.y, nVect.z, 0, 0, 0, 0, 1, 0);
-}
-
-function settingMouseCamera2(proximity) {
   let camPosX = 0;
   let camPosY = 0;
   let camPosZ = 100;
@@ -55,45 +54,6 @@ function settingMouseCamera2(proximity) {
   camera(camPosX, camPosY, camPosZ,
     camTargetX, camTargetY, camTargetZ,
     camUPX, camUPY, camUPZ);
-}
-
-function settingRotationCamera(proximity) {
-  let xRotNorm = map(rotationX, -180, 180, -1, 1)
-  let yRotNorm = map(rotationY, -180, 180, -1, 1)
-  let nVect = get3DVector(xRotNorm, yRotNorm)
-  nVect.mult(proximity)
-  camera(nVect.x, nVect.y, nVect.z, 0, 0, 0, 0, 1, 0);
-}
-
-function getNormalizedMouse() {
-  let mVector = createVector(map(mouseX, 0, width, -1, 1), map(mouseY, 0, height, -1, 1))
-  return mVector;
-}
-
-/** This method reduces the scale of the object if the xy coordinate proyection on the sphere falls infinite*/
-function get3DVector2(x, y) {
-  let xComp = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2))
-  let azimuth = Math.acos(xComp);
-  let z = Math.sin(azimuth);
-  return createVector(x, y, z)
-}
-
-/** This method reduces the scale of the object if the xy coordinate proyection on the sphere falls infinite*/
-function get3DVector(x, y) {
-  let xComp = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2))
-  let azimuth = Math.acos(xComp);
-  let z = Math.sin(azimuth);
-  return createVector(x, y, z)
-}
-
-/** This method returns infinite if the xy coordinate proyection on the sphere falls infinite*/
-function get3DVectorAngles(x, y) {
-  // polar coord
-  let polar = atan2(y, x);
-  // azimuth
-  let xComp = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2))
-  let azimuth = Math.acos(xComp);
-  return p5.Vector.fromAngles(polar, azimuth)
 }
 
 function showStage() {
@@ -140,74 +100,7 @@ function showAxes(rotation) {
   }
 }
 
-function mouseWheel(event) {
-  if (event.delta > 0) {
-    if (zoom < 5) {
-      zoom += 0.1
-    }
-  } else {
-    if (zoom > 0.5) {
-      zoom -= 0.1
-    }
-  }
-}
 
-function vectorField(orgX, orgY, targetX, targetY) {
-  for (let i = 0; i < n; i++) {
-    for (let j = 0; j < n; j++) {
-      let xOrg = orgX + 10 + i * (width / n)
-      let yOrg = orgY + 10 + j * (height / n)
-      let length = width / (n * 2)
-      drawVector(xOrg, yOrg, targetX, targetY, length)
-    }
-  }
-}
-
-function getColor(vX, vY, obX, obY){
-  let close = dist(vX, vY, obX, obY)
-  return map (close, 0, 300, 100, 0 )
-}
-
-function drawVector(xOrg, yOrg, directionX, directionY, radius) {
-  let a = getHeading(xOrg, yOrg, directionX, directionY);
-  let opacity = getColor(xOrg, yOrg, directionX, directionY)
-  let pos = getXY(a, radius);
- 
-  stroke(0,opacity,100, 20);
-  fill(0,opacity,100, 20);
-  strokeWeight(1)
-  normalMaterial();
-  push()
-  translate(xOrg, yOrg)
-  rotate(a-(PI/2))
-  cone(5, radius);
-  pop()
-  //line(xOrg, yOrg, 10, pos.x + xOrg, pos.y + yOrg, 10);
-  //triangle(xOrg - (radius/4), yOrg, pos.x + xOrg, pos.y + yOrg, xOrg + (radius/4),yOrg)
-}
-
-function getHeading(x, y, pX, pY) {
-  return atan2(pY - y, pX - x);
-}
-
-
-function getX(angle, radius) {
-  return cos(angle) * radius;
-}
-
-
-function getY(angle, radius) {
-  return sin(angle) * radius;
-}
-
-function getXY(angle, radius) {
-  let xComp = getX(angle, radius);
-  let yComp = getY(angle, radius);
-  return ({
-    x: xComp,
-    y: yComp
-  })
-}
 
 function fantasma(radius) {
   if (pAngle > TWO_PI) {
@@ -215,5 +108,12 @@ function fantasma(radius) {
   } else {
     pAngle += 0.001;
   }
-  return getXY(pAngle, radius)
+  let pos = Utils.polarToCartesian(pAngle, radius)
+  push()
+  fill(125,100,100)
+  translate(0,0,1)
+  ellipse(pos.x, pos.y, 20, 20);
+  pop()
+  return pos
 }
+
