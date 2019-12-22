@@ -1,20 +1,17 @@
 
- let fish;
+
 function sketchIt(p5) {
   let mapa;
   let cyclist;
   let ghost;
   // gui booleans
   let firstPersonView;
-  let deemMap;
-  let chase;
-  let gravitate;
- 
+  let showMap;
+  let animate;
 
   p5.preload = function () {
     myFont = p5.loadFont("fonts/Roboto/Roboto-Medium.ttf")
     mapa = p5.loadImage("img/map2.png")
-    fish = p5.loadModel("obj/fish.obj")
   }
 
   p5.setup = function () {
@@ -26,7 +23,7 @@ function sketchIt(p5) {
     //cyclist.initializeVectorField ('phyllo', 100, p5.width, p5.height);
     cyclist.initializeVectorField('radial', 7, p5.width, p5.height);
     // Instantiate ghost
-    ghost = new Fantasma(p5, 80, 180);
+    ghost = new Fantasma(p5, 80, 0);
     // Graphics settings
     p5.smooth();
     p5.colorMode(p5.HSB)
@@ -34,13 +31,11 @@ function sketchIt(p5) {
     p5.textSize(12)
     // GUI
     firstPersonView = true;
-    deemMap = true;
-    chase = false;
-    gravitate = false;
+    showMap = true;
+    animate = true;
     document.getElementById('viewMode').onclick = switchViewMode;
-    document.getElementById('deemMap').onclick = switchMapView;
-    document.getElementById('chase').onclick = switchChase;
-    document.getElementById('ghostMode').onclick = switchGravitate;
+    document.getElementById('showMap').onclick = switchMapView;
+    document.getElementById('animation').onclick = switchAnimate;
   }
 
   p5.draw = function () {
@@ -50,17 +45,17 @@ function sketchIt(p5) {
       panoramic()
     }
     // mapa
-    if (deemMap) {
+    if (showMap) {
       p5.tint(180, 10, 50, 126);
     }
     p5.image(mapa, -300, -450)
 
     // vectorfield
     cyclist.show(ghost)
-    cyclist.chase(chase, ghost, 0.008)
+    cyclist.chase(ghost, 0.0008)
 
     // ghost
-    ghost.show(p5, gravitate, 200); //'bounce' or gravitate
+    ghost.show(p5, 'bounce', 200); //'bounce' or gravitate
   }
 
   /*** CAMERA FUNCTIONS */
@@ -76,10 +71,10 @@ function sketchIt(p5) {
   function settingMouseCamera(proximity) {
     let camPosX = 0;
     let camPosY = 0;
-    let camPosZ = 100;
+    let camPosZ = 90;
     let camTargetX = p5.map(p5.mouseX, 0, p5.width, -1, 1) * proximity;
     let camTargetY = p5.map(p5.mouseY, 0, p5.height, -1, 1) * proximity;
-    if (chase) {
+    if (animate) {
       camTargetX = cyclist.pos.x;
       camTargetY = cyclist.pos.y;
     } 
@@ -138,24 +133,17 @@ function sketchIt(p5) {
   }
 
   function switchMapView() {
-    deemMap = !deemMap
+    showMap = !showMap
   }
 
-  function switchGravitate() {
-    gravitate = !gravitate;
-    if (!gravitate) {
-      document.getElementById('ghostMode').innerHTML = "Ghost Orbiting"
+  function switchAnimate() {
+    animate = !animate;
+    if (!animate){
+      document.getElementById('caption').innerHTML = "Touch the screen or move the mouse to change viewpoint"
+      document.getElementById('animation').innerHTML = "Animate camera"
     } else {
-      document.getElementById('ghostMode').innerHTML = "Ghost Bouncing"
-    }
-  }
-
-  function switchChase() {
-    chase = !chase;
-    if (!chase) {
-      document.getElementById('chase').innerHTML = "Chase the ghost"
-    } else {
-      document.getElementById('chase').innerHTML = "Stop chasing the ghost"
+      document.getElementById('caption').innerHTML ="Stop camera to control camera"
+      document.getElementById('animation').innerHTML = "Stop camera"
     }
   }
 }

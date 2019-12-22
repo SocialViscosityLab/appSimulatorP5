@@ -30,23 +30,18 @@ class Fantasma {
       };
   
       show(p5, mode, radius) {
-        if (mode){
-          this.gravitate(radius);
-        }else {
-          this.bounce(p5);
+        switch (mode) {
+          case 'gravitate':
+            this.gravitate(radius);
+            break;
+          case 'bounce':
+            this.bounce(p5);
         }
         p5.push();
         p5.fill(125, 100, 100);
-        p5.translate(this.pos.x, this.pos.y, 4);
-        //p5.rotateZ(-Math.PI/2)
-        p5.rotateX(-Math.PI/2)
-        p5.noStroke
-        p5.emissiveMaterial(150, 100, 100, 0.8)
-        //p5.scale(1.2)
-        p5.cone(10,20)
-        //p5.model(fish)
-        //p5.ellipse(this.pos.x, this.pos.y, 20, 20);
+        p5.translate(0, 0, 1);
+        p5.noStroke()
+        p5.ellipse(this.pos.x, this.pos.y, 20, 20);
         p5.pop();
-        //this.prevVector = this.pos
       };
   }
