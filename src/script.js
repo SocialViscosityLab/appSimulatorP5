@@ -1,5 +1,6 @@
 
- let fish;
+let fish;
+
 function sketchIt(p5) {
   let mapa;
   let cyclist;
@@ -14,7 +15,7 @@ function sketchIt(p5) {
   p5.preload = function () {
     myFont = p5.loadFont("fonts/Roboto/Roboto-Medium.ttf")
     mapa = p5.loadImage("img/map2.png")
-    fish = p5.loadModel("obj/fish.obj")
+    //fish = p5.loadModel("obj/fish.obj")
   }
 
   p5.setup = function () {
@@ -23,8 +24,8 @@ function sketchIt(p5) {
     Utils.setP5(p5)
     // Instantiate cyclist
     cyclist = new Cyclist(p5, 0, 0, 10)
-    //cyclist.initializeVectorField ('phyllo', 100, p5.width, p5.height);
-    cyclist.initializeVectorField('radial', 7, p5.width, p5.height);
+   // cyclist.initializeVectorField ('phyllo', 100, p5.width, p5.height);
+    cyclist.initializeVectorField('radial', 3, p5.width, p5.height);
     // Instantiate ghost
     ghost = new Fantasma(p5, 80, 180);
     // Graphics settings
