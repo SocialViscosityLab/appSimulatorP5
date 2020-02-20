@@ -12,6 +12,7 @@
 
   <!-- STYLE-->
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/style.css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
@@ -19,26 +20,24 @@
 
 <body>
   <div class="container-fluid">
-    <div class="row" style="margin-top: 100px">
-      <div class="col-sm-2">
-        ..
-      </div>
-      <div class="col-sm-8">
-        <img class="img-responsive" src= "http://ftp.smartartifact.com/ColorAgents/images/D4SV.png" width="200"></img>
+    <div class="row">
+      <div id="sketchHolder"></div>
+      <div class="col-sm-1">
+        </div>
+      <div class="col-sm-10" id="content">
         
         <H4>Protoype bicyle navigator</H4>
         <button id='viewMode'> Aerial view</button>
         <button id='deemMap'> Deem map</button>
-        <button id='chase'> Chase the ghost</button>
-        <button id='ghostMode'> Ghost orbiting</button>
         <br>
         <br>
         <div id="caption"> Stop orbital view to enable mouse or touch control</div>
-        <div id="sketchHolder"></div>
+        <div id="help"> </div>
+        <button id='fullscreen'> Turn fullscreen on</button>
+
 
       </div>
-      <div class="col-sm-2">
-        ..
+      <div class="col-sm-1">
       </div>
 
     </div>

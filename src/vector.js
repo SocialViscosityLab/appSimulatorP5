@@ -5,7 +5,9 @@ class Vector extends p5.Vector {
     }
 
     updatePosition(newPos){
-        this.add(newPos)
+        this.set(newPos)
+       
+
     }
 
     show = function (p5, target, radius) {

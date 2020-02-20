@@ -7,6 +7,8 @@ class Cyclist {
 
     initializeVectorField(mode, n) {
         this.vField = new VectorField(this.p5, mode, n, p5.width, p5.height);
+        this.vField.updatePosition(this.p5.createVector(this.pos.x, this.pos.y, this.pos.z))
+
     }
 
     chase(enabled, ghost, lerpMag) {
@@ -40,6 +42,11 @@ class Cyclist {
     }
 
     updatePosition(pos) {
-        this.pos.add(pos)
+        //this.pos.add(pos)
+        this.pos = pos;
+        //this.vField.updatePosition(pos)
+        this.vField.updateConcentric(pos)
+        //console.log(this.pos)
+
     }
 }

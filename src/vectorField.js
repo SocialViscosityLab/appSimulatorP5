@@ -7,6 +7,8 @@ class VectorField {
         this.width = _w;
         this.height = _h;
         this.arrangement = arrangement;
+        this.rings;
+        this.radius;
         switch (arrangement) {
             case 'orto':
                 this.initializeOrtho()
@@ -74,12 +76,14 @@ class VectorField {
     }
 
     initializeConcentric = function (rings, radius) {
+        this.rings = rings;
+        this.radius = radius;
         this.vectors = [];
         let parts = 4
-        for (let i = 1; i <= rings; i++) {
+        for (let i = 1; i <= this.rings; i++) {
             let angle = (Math.PI*2) / (i * parts)
             for (let j = 0; j < i * parts; j++) {
-                let pos = Utils.polarToCartesian(angle * j, radius * i);
+                let pos = Utils.polarToCartesian(angle * j, this.radius * i);
                 let zOrig = 0;
                 let tmp = new Vector(this.orgX + pos.x, this.orgY + pos.y, zOrig);
                 this.vectors.push(tmp)
@@ -117,6 +121,26 @@ class VectorField {
     updatePosition = function (newPos) {
         for (let i = 0; i < this.vectors.length; i++) {
             this.vectors[i].updatePosition(newPos)
+        }
+        //console.log("Field origin x:"+this.orgX)
+        //console.log("Field origin y:"+this.orgY)
+    }
+
+    updateConcentric = function (newPos) {
+        let parts = 4
+        let count = 0;
+        for (let i = 1; i <= this.rings; i++) {
+            let angle = (Math.PI*2) / (i * parts)
+            for (let j = 0; j < i * parts; j++) {
+                let pos = Utils.polarToCartesian(angle * j, this.radius * i);
+                let zOrig = 0;
+                let tmp = new Vector(newPos.x + pos.x, newPos.y + pos.y, zOrig);
+                //this.vectors.push(tmp)
+                this.vectors[count].updatePosition(tmp)
+                count++;
+                //let row = (i*parts)-parts;
+                //let col = j*this.rings;
+            }
         }
     }
 }

@@ -3,6 +3,8 @@ class Fantasma {
       this.pos = _p5.createVector(_x, _y);
       this.going = true;
       this.pAngle = 0;
+      this.route = [];
+      this.currentGoal = 0;
     }
       gravitate (radius) {
         if (this.pAngle > Math.TWO_PI) {
@@ -28,12 +30,35 @@ class Fantasma {
           this.pos.y -= 0.2;
         }
       };
+
+      AddRoute (route) {
+        this.route = route;
+      }
+
+      //*Speed is the number of pixels for iteration
+      followRoute (p5,speed) {
+        if(this.route.length > 0){
+          let goalPos = this.route[this.currentGoal];
+          if(this.currentGoal  != this.route.length){
+            let difV = goalPos.copy()
+            difV.sub(this.pos)
+            if (difV.mag() >= speed){
+              let toMove = difV.normalize().mult(speed)
+              this.pos.add(toMove)
+            } else{
+              this.currentGoal++;
+            }
+          }
+        }
+      }
   
-      show(p5, mode, radius) {
-        if (mode){
-          this.gravitate(radius);
-        }else {
+      show(p5, mode, value) {
+        if (mode == 0){
+          this.gravitate(value);
+        }else if(mode == 1) {
           this.bounce(p5);
+        }else if (mode == 2){
+          this.followRoute(p5,value)
         }
         p5.push();
         p5.fill(125, 100, 100);
@@ -42,11 +67,7 @@ class Fantasma {
         p5.rotateX(-Math.PI/2)
         p5.noStroke
         p5.emissiveMaterial(150, 100, 100, 0.8)
-        //p5.scale(1.2)
         p5.cone(10,20)
-        //p5.model(fish)
-        //p5.ellipse(this.pos.x, this.pos.y, 20, 20);
         p5.pop();
-        //this.prevVector = this.pos
       };
   }
