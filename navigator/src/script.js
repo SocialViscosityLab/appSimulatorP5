@@ -4,7 +4,7 @@ let myCoord;
 let pos;
 
 // communication
-let socket = io.connect('http://localhost:3100');
+let socket = io.connect('https://10.194.143.140:8080', {secure: true});
 
 function sketchIt(p5) {
     let mapa;
@@ -234,7 +234,7 @@ var tid = setInterval(function() {
     //clearInterval( tid );      
     getLocation();
     // do your work
-    socket.emit('message', { "key": "hello world" });
+    socket.emit('message', { "key": myCoord });
 }, 100);
 
 function coordinate(x, y) {

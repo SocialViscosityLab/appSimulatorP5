@@ -4,11 +4,29 @@
 // at this point there should be: i) a folder node_modules, ii) a package-lock.json iii) express in the list of dependencies in package.json
 // npm install socket.io --save , to install socket.io. New dependency in pakages.json
 // Import Express to host a webpage
+
+var fs = require('fs');
+var http = require('http');
+var https = require('https');
+var privateKey  = fs.readFileSync('/Users/Dani/.localhost-ssl/localhost.key', 'utf8');
+var certificate = fs.readFileSync('/Users/Dani/.localhost-ssl/localhost.crt', 'utf8');
+
+var credentials = {key: privateKey, cert: certificate};
 var express = require('express');
 var app = express();
 
-// Run the server in port 3000
-var server = app.listen(3100);
+// your express configuration here
+
+var httpServer = http.createServer(app);
+var httpsServer = https.createServer(credentials, app);
+
+var server = httpsServer.listen(8080);
+//httpsServer.listen(8443);
+
+
+
+// Run the server in port 8080
+//var server = app.listen(8080);
 
 // serve the folder 'public' whenever someone connects to this port
 app.use(express.static('../navigator'))
