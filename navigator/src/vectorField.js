@@ -22,16 +22,16 @@ class VectorField {
             case 'radial':
                 this.initializeConcentric(this.density, 30);
         }
-        console.log("vectors: " + this.vectors.length)
+        //console.log("vectors: " + this.vectors.length)
         this.sink = 10;
     }
 
-    centerOriginToCoordSystem(){
-        this.orgX = -this.width/2
-        this.orgY = -this.height/2
+    centerOriginToCoordSystem() {
+        this.orgX = -this.width / 2
+        this.orgY = -this.height / 2
     }
 
-    initializeOrtho = function () {
+    initializeOrtho = function() {
         this.vectors = [];
         this.centerOriginToCoordSystem()
         for (let i = 0; i < this.density; i++) {
@@ -45,13 +45,13 @@ class VectorField {
         }
     }
 
-    initializeFencedMatrix = function (p5, radius) {
+    initializeFencedMatrix = function(p5, radius) {
         this.vectors = [];
         this.centerOriginToCoordSystem()
         for (let i = 0; i < this.density; i++) {
             for (let j = 0; j < this.density; j++) {
-                let xOrg = this.orgX  + j * (this.width / this.density)
-                let yOrg = this.orgY  + i * (this.height / this.density)
+                let xOrg = this.orgX + j * (this.width / this.density)
+                let yOrg = this.orgY + i * (this.height / this.density)
                 let zOrig = 0;
                 let tmp = new Vector(xOrg, yOrg, zOrig);
                 if (p5.dist(0, 0, xOrg, yOrg) < radius) {
@@ -61,7 +61,7 @@ class VectorField {
         }
     }
 
-    initializePhyllotaxis = function (amount) {
+    initializePhyllotaxis = function(amount) {
         this.vectors = [];
         let n = amount;
         let c = 16;
@@ -75,13 +75,13 @@ class VectorField {
         }
     }
 
-    initializeConcentric = function (rings, radius) {
+    initializeConcentric = function(rings, radius) {
         this.rings = rings;
         this.radius = radius;
         this.vectors = [];
         let parts = 4
         for (let i = 1; i <= this.rings; i++) {
-            let angle = (Math.PI*2) / (i * parts)
+            let angle = (Math.PI * 2) / (i * parts)
             for (let j = 0; j < i * parts; j++) {
                 let pos = Utils.polarToCartesian(angle * j, this.radius * i);
                 let zOrig = 0;
@@ -91,13 +91,13 @@ class VectorField {
         }
     }
 
-    show = function (p5, target) {
+    show = function(p5, target) {
         for (let i = 0; i < this.vectors.length; i++) {
             this.vectors[i].show(p5, target)
         }
     }
 
-    showSink = function () {
+    showSink = function() {
         for (let i = 0; i < this.vectors.length - this.density; i++) {
             let row = p5.int(i / this.density)
             let cnt = (this.density * row) - 1 + this.density
@@ -118,7 +118,7 @@ class VectorField {
         }
     }
 
-    updatePosition = function (newPos) {
+    updatePosition = function(newPos) {
         for (let i = 0; i < this.vectors.length; i++) {
             this.vectors[i].updatePosition(newPos)
         }
@@ -126,11 +126,11 @@ class VectorField {
         //console.log("Field origin y:"+this.orgY)
     }
 
-    updateConcentric = function (newPos) {
+    updateConcentric = function(newPos) {
         let parts = 4
         let count = 0;
         for (let i = 1; i <= this.rings; i++) {
-            let angle = (Math.PI*2) / (i * parts)
+            let angle = (Math.PI * 2) / (i * parts)
             for (let j = 0; j < i * parts; j++) {
                 let pos = Utils.polarToCartesian(angle * j, this.radius * i);
                 let zOrig = 0;

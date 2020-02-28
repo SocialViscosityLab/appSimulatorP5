@@ -5,33 +5,18 @@
 // npm install socket.io --save , to install socket.io. New dependency in pakages.json
 // Import Express to host a webpage
 
-var fs = require('fs');
-var http = require('http');
-var https = require('https');
-var privateKey  = fs.readFileSync('/Users/Dani/.localhost-ssl/localhost.key', 'utf8');
-var certificate = fs.readFileSync('/Users/Dani/.localhost-ssl/localhost.crt', 'utf8');
+var app = require("https-localhost")();
+//var express = express();
+var port = 3100
+console.log(" *** server running in port " + port)
 
-var credentials = {key: privateKey, cert: certificate};
-var express = require('express');
-var app = express();
-
-// your express configuration here
-
-var httpServer = http.createServer(app);
-var httpsServer = https.createServer(credentials, app);
-
-var server = httpsServer.listen(8080);
-//httpsServer.listen(8443);
-
-
-
-// Run the server in port 8080
-//var server = app.listen(8080);
+// Run the server in port 3000
+var server = app.listen(port);
 
 // serve the folder 'public' whenever someone connects to this port
-app.use(express.static('../navigator'))
-
-// import socket library
+//app.use(express.static('/Users/jsal/Documents/GitHub/ABMS_Bicycles/appSimulatorP5Local/navigator'))
+app.serve('/Users/jsal/Documents/GitHub/ABMS_Bicycles/appSimulatorP5/navigator')
+    // import socket library
 var socket = require("socket.io")
 
 // server is just a function, so this is passed to socket as a parameter

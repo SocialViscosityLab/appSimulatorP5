@@ -2,9 +2,11 @@ let helpText;
 let realAngle;
 let myCoord;
 let pos;
+let url = 'https://10.195.69.2:3100'
 
 // communication
-let socket = io.connect('https://10.194.143.140:8080', {secure: true});
+let socket = io.connect(url, { secure: true }); //,
+console.log("Running code script.js. URL: " + url)
 
 function sketchIt(p5) {
     let mapa;
@@ -23,7 +25,6 @@ function sketchIt(p5) {
     let cyclistHight = 20;
 
     let routeDP = [];
-
 
     p5.preload = function() {
         myFont = p5.loadFont("fonts/Roboto/Roboto-Medium.ttf")
@@ -234,7 +235,7 @@ var tid = setInterval(function() {
     //clearInterval( tid );      
     getLocation();
     // do your work
-    socket.emit('message', { "key": myCoord });
+    socket.emit('message', myCoord);
 }, 100);
 
 function coordinate(x, y) {

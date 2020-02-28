@@ -9,6 +9,7 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.17.1",
+    "https-localhost": "^4.5.0",
     "socket.io": "^2.3.0"
   },
   "devDependencies": {},
