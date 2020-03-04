@@ -5,7 +5,6 @@ let pos;
 
 // communication
 let socket = io.connect('https://10.194.143.140:8080', {secure: true});
-
 function sketchIt(p5) {
     let mapa;
     let cyclist;
@@ -31,7 +30,6 @@ function sketchIt(p5) {
     }
 
     p5.setup = function() {
-
         //Set the dimentions of the map and the range of it's coordiantes
         mapHight = 1900;
         mapWidth = 1000;

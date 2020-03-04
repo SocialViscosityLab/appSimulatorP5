@@ -10,10 +10,11 @@ var http = require('http');
 var https = require('https');
 var privateKey  = fs.readFileSync('/Users/Dani/.localhost-ssl/localhost.key', 'utf8');
 var certificate = fs.readFileSync('/Users/Dani/.localhost-ssl/localhost.crt', 'utf8');
-
 var credentials = {key: privateKey, cert: certificate};
 var express = require('express');
 var app = express();
+
+console.log("hooli")
 
 // your express configuration here
 
