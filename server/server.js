@@ -4,7 +4,6 @@
 // at this point there should be: i) a folder node_modules, ii) a package-lock.json iii) express in the list of dependencies in package.json
 // npm install socket.io --save , to install socket.io. New dependency in pakages.json
 // Import Express to host a webpage
-
 var fs = require('fs');
 var http = require('http');
 var https = require('https');
@@ -37,6 +36,7 @@ var socket = require("socket.io")
 
 // server is just a function, so this is passed to socket as a parameter
 var io = socket(server);
+var startTime = Date.now();
 
 // Verify if you have a new connection
 io.sockets.on('connection', newConnection);
@@ -46,10 +46,51 @@ function newConnection(socket) {
     console.log('new connection ' + socket.id)
         // for each received message
     socket.on('message', mouseMsg);
+  
 
-    function mouseMsg(data) {
-        console.log(data);
-        // broadcast to other clients except the original sender of this message 
-        //socket.broadcast.emit('message', data)
+    socket.on('disconnect', function() {
+        saveSession(socket.client.conn.id)
+        console.log("desconeted" + socket.client.conn.id)
+
+    });
+
+    function mouseMsg(data, data2) {
+        message = {
+            id: socket.client.conn.id,
+            coord: data,
+            gcoord: data2,
+            timeStamp: getEllapsedTime()
+        }
+        console.log(message)
+        addToJson(message)
+    }
+}
+
+function getEllapsedTime() {
+    return Date.now() - startTime;
+}
+
+function saveSession(id) {
+    fs.writeFile("json_"+id+".json", JSON.stringify(users[id], null, "\t"), function(err) {
+        if (err) {
+            console.log(err);
+        }
+    });
+    console.log('JSON saved')
+}
+
+let users = [];
+
+function addToJson(message) {
+
+    let id = message.id;
+    let timeStamp = message.timeStamp;
+
+    if (users >= 0) {
+        if (!users[id]) {
+            users[id] = {}
+        } else {
+            users[id][timeStamp] ={"coords": message.coord, "gcoord": message.gcoord}
+        }
     }
 }

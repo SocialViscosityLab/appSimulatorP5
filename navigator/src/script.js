@@ -2,13 +2,15 @@ let helpText;
 let realAngle;
 let myCoord;
 let pos;
+let gCoord
 
 // communication
-let socket = io.connect('https://10.194.143.140:8080', {secure: true});
+let socket = io.connect('https://192.168.1.7:8080', {secure: true});
 function sketchIt(p5) {
     let mapa;
     let cyclist;
     let ghost;
+
     // gui booleans
     let firstPersonView;
     let deemMap;
@@ -102,6 +104,7 @@ function sketchIt(p5) {
         cyclist.show(ghost)
             //cyclist.chase(chase, ghost, 0.008)
         pos = fromLocToPos(myCoord);
+        gCoord = fromPosToLoc(ghost.pos)
         cyclist.updatePosition(p5.createVector(pos.x, pos.y, cyclistHight))
 
         // ghost
@@ -124,24 +127,13 @@ function sketchIt(p5) {
         let posY = p5.map(coors.x, latMin, latMax, -(mapHight / 2), (mapHight / 2))
         return p5.createVector(posX, posY)
     }
-    /*
-    let camTargetX = p5.map(p5.mouseX, 0, p5.width, -1, 1) * proximity;
-        function settingMouseCamera(proximity) {
-        let camTargetY = p5.map(p5.mouseY, 0, p5.height, -1, 1) * proximity;
-        if (chase) {
-          camTargetX = cyclist.pos.x;
-          camTargetY = cyclist.pos.y;
-        } 
-        let camTargetZ = 0;
-        let camUPX = 0;
-        let camUPY = 0;
-        let camUPZ = -1;
-        p5.camera(posX, posY, headHight,
-          camTargetX, camTargetY, camTargetZ,
-          camUPX, camUPY, camUPZ);
-      }
-      */
 
+    function fromPosToLoc(pos) {
+        let lon = p5.map(pos.y, -(mapWidth / 2), (mapWidth / 2), lonMin, lonMax)
+        let lat = p5.map(pos.x, -(mapHight / 2), (mapHight / 2), latMin, latMax)
+        return {x:lat, y:lon}
+    }
+ 
     function settingRotationCamera(proximity) {
         if (p5.rotationX < 10) {
             proximity = 1;
@@ -229,26 +221,15 @@ function showPosition(position) {
 
 var tid = setInterval(function() {
     if (document.readyState !== 'complete') return;
-    //clearInterval( tid );      
-    getLocation();
-    // do your work
-    socket.emit('message', { "key": myCoord });
-}, 100);
+        //clearInterval( tid );      
+        getLocation();
+        // do your work
+
+        socket.emit('message', myCoord, gCoord);
+        //socket.emit('message', { "coord" :myCoord, "gCoord": ghost.pos});
+    }, 100);
 
 function coordinate(x, y) {
     this.x = x;
     this.y = y;
-}
-
-function handleOrientation(event) {
-    /*
-      if(event.webkitCompassHeading) {
-        realAngle = event.webkitCompassHeading;
-       }else{
-        realAngle    = event.alpha; //z axis rotation [0,360)
-       }
-       //helpText.style.color = "red";
-       */
-    realAngle = event.webkitCompassHeading; //z axis rotation [0,360)
-
 }
