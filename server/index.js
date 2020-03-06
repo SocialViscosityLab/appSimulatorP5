@@ -15,6 +15,7 @@ var https = require('https');
 
 var privateKey = fs.readFileSync('/Users/jsal/localhost-ssl/server.key', 'utf8');
 var certificate = fs.readFileSync('/Users/jsal/localhost-ssl/server.crt', 'utf8');
+let users = [];
 
 // var privateKey = fs.readFileSync('/Users/Dani/.localhost-ssl/localhost.key', 'utf8');
 // var certificate = fs.readFileSync('/Users/Dani/.localhost-ssl/localhost.crt', 'utf8');
@@ -52,8 +53,6 @@ var socket = require("socket.io")
 // server is just a function, so this is passed to socket as a parameter
 var io = socket.listen(server);
 
-var startTime = Date.now();
-
 // Verify if you have a new connection
 io.sockets.on('connection', newConnection);
 
@@ -63,37 +62,38 @@ function newConnection(socket) {
         // for each received message
     socket.on('message', mouseMsg);
     socket.on('disconnect', function() {
-        saveJSON()
-        console.log("desconeted" + socket.client.conn.id)
+        saveSession(socket.client.conn.id);
+        console.log("desconected" + socket.client.conn.id)
 
     });
 
-    function mouseMsg(data) {
-        if (data != 'exit') {
-            message = {
-                id: socket.client.conn.id,
-                msg: data,
-                timeStamp: getEllapsedTime()
-            }
-            addToJson(message)
-        } else {
-            saveJSON()
+    function mouseMsg(data, data2, time) {
+
+        message = {
+            id: socket.client.conn.id,
+            coord: data,
+            gcoord: data2,
+            timeStamp: time
         }
+        addToJson(message)
+        console.log(message)
 
         // broadcast to other clients except the original sender of this message 
         //socket.broadcast.emit('message', data)
     }
 }
 
-function getEllapsedTime() {
-    return Date.now() - startTime;
-}
 
-function saveJSON() {
+function saveSession(id) {
+    fs.writeFile("/Users/jsal/Documents/GitHub/ABMS_Bicycles/appSimulatorP5/userCollectedData/json_" + id + ".json", JSON.stringify(users[id], null, "\t"), function(err) {
+        if (err) {
+            console.log(err);
+        }
+    });
     console.log('JSON saved')
 }
 
-let users = [];
+
 
 function addToJson(message) {
 
@@ -102,9 +102,9 @@ function addToJson(message) {
 
     if (users >= 0) {
         if (!users[id]) {
-            users[id] = []
+            users[id] = {}
         } else {
-            users[id].push({ "timeStamp": timeStamp, "coords": message.msg })
+            users[id][timeStamp] = { "coord": message.coord, "gcoord": message.gcoord }
         }
     }
 }

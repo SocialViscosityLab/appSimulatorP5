@@ -2,11 +2,14 @@ let helpText;
 let realAngle;
 let myCoord;
 let pos;
-let url = 'https://10.195.69.2:3100'
+let gCoord;
+let url = 'https://10.195.113.54:3100' // IP of the machine running the server
 
 // communication
 let socket = io.connect(url, { secure: true }); //,
 console.log("Running code script.js. URL: " + url)
+
+var startTime = Date.now();
 
 function sketchIt(p5) {
     let mapa;
@@ -43,17 +46,18 @@ function sketchIt(p5) {
 
         //User's coordinates and mapped positions
         myCoord = p5.createVector(40.107546, -88.227257);
-        pos = fromLocToPos(myCoord);
-        // Ghost's route 
-        routeDP.push(fromLocToPos(p5.createVector(40.108804, -88.227606)));
-        routeDP.push(fromLocToPos(p5.createVector(40.108818, -88.226828)));
-        routeDP.push(fromLocToPos(p5.createVector(40.108024, -88.227474)));
-        routeDP.push(fromLocToPos(p5.createVector(40.108024, -88.226841)));
-        routeDP.push(fromLocToPos(p5.createVector(40.108020, -88.226846)));
-        routeDP.push(fromLocToPos(p5.createVector(40.107895, -88.226827)));
-        routeDP.push(fromLocToPos(p5.createVector(40.107302, -88.227565)));
 
-        routeDP.push(fromLocToPos(p5.createVector(40.106297, -88.227527)));
+        pos = fromLocToPosChambon(myCoord);
+        // Ghost's route 
+        routeDP.push(fromLocToPosChambon(p5.createVector(40.108804, -88.227606)));
+        routeDP.push(fromLocToPosChambon(p5.createVector(40.108818, -88.226828)));
+        routeDP.push(fromLocToPosChambon(p5.createVector(40.108024, -88.227474)));
+        routeDP.push(fromLocToPosChambon(p5.createVector(40.108024, -88.226841)));
+        routeDP.push(fromLocToPosChambon(p5.createVector(40.108020, -88.226846)));
+        routeDP.push(fromLocToPosChambon(p5.createVector(40.107895, -88.226827)));
+        routeDP.push(fromLocToPosChambon(p5.createVector(40.107302, -88.227565)));
+
+        routeDP.push(fromLocToPosChambon(p5.createVector(40.106297, -88.227527)));
 
 
         canvas = p5.createCanvas(p5.windowWidth, p5.windowHeight, p5.WEBGL);
@@ -104,11 +108,12 @@ function sketchIt(p5) {
         // vectorfield
         cyclist.show(ghost)
             //cyclist.chase(chase, ghost, 0.008)
-        pos = fromLocToPos(myCoord);
+        pos = fromLocToPosChambon(myCoord);
+        gCoord = fromPosToLoc(ghost.pos)
         cyclist.updatePosition(p5.createVector(pos.x, pos.y, cyclistHight))
 
         // ghost
-        ghost.show(p5, 2, 50); //0 = bounce, 1 = gravitate, 2 = follow route
+        ghost.show(p5, 2, 5); //0 = bounce, 1 = gravitate, 2 = follow route
     }
 
     /*** CAMERA FUNCTIONS */
@@ -123,9 +128,21 @@ function sketchIt(p5) {
     }
     //The x and y here are exchange between the coordinates and the position because of the convention of lat/lon.
     function fromLocToPos(coors) {
+        let posX = p5.map(coors.lon, lonMin, lonMax, -(mapWidth / 2), (mapWidth / 2))
+        let posY = p5.map(coors.lat, latMin, latMax, -(mapHight / 2), (mapHight / 2))
+        return p5.createVector(posX, posY)
+    }
+
+    function fromLocToPosChambon(coors) {
         let posX = p5.map(coors.y, lonMin, lonMax, -(mapWidth / 2), (mapWidth / 2))
         let posY = p5.map(coors.x, latMin, latMax, -(mapHight / 2), (mapHight / 2))
         return p5.createVector(posX, posY)
+    }
+
+    function fromPosToLoc(pos) {
+        let lon = p5.map(pos.y, -(mapWidth / 2), (mapWidth / 2), lonMin, lonMax)
+        let lat = p5.map(pos.x, -(mapHight / 2), (mapHight / 2), latMin, latMax)
+        return { lat: lat, lon: lon }
     }
     /*
     let camTargetX = p5.map(p5.mouseX, 0, p5.width, -1, 1) * proximity;
@@ -226,21 +243,22 @@ function getLocation() {
 function showPosition(position) {
     lat = position.coords.latitude;
     lon = position.coords.longitude;
-    myCoord = new coordinate(lat, lon)
+    myCoord = p5.createVector(lat, lon)
         //console.log( "Current coordinates is:"+myCoord.x+"/ "+myCoord.y)
 }
 
+/** Sends data to server */
 var tid = setInterval(function() {
     if (document.readyState !== 'complete') return;
     //clearInterval( tid );      
     getLocation();
     // do your work
-    socket.emit('message', myCoord);
+    socket.emit('message', { x: myCoord.x, y: myCoord.y }, gCoord, getEllapsedTime());
 }, 100);
 
-function coordinate(x, y) {
-    this.x = x;
-    this.y = y;
+function coordinate(lat, lon) {
+    this.lat = lat;
+    this.lon = lon;
 }
 
 function handleOrientation(event) {
@@ -254,4 +272,8 @@ function handleOrientation(event) {
        */
     realAngle = event.webkitCompassHeading; //z axis rotation [0,360)
 
+}
+
+function getEllapsedTime() {
+    return Date.now() - startTime;
 }
