@@ -3,18 +3,24 @@ let realAngle;
 let myCoord;
 let pos;
 let gCoord;
-let url = 'https://socialviscosity.web.illinois.edu/smartBicycleSocket:8080' // IP of the machine running the server
+var startTime;
+let saveJSON = false;
+let sessionLive = true;
+let dataCoords = [];
+let output;
+//let url = 'https://socialviscosity.web.illinois.edu/smartBicycleSocket:8080' // IP of the machine running the server
 
 // communication
-let socket = io.connect(url, { secure: true }); //,
-console.log("Running code script.js. URL: " + url)
+// let socket = io.connect(url, { secure: true }); //,
+// console.log("Running code script.js. URL: " + url)
 
-var startTime = Date.now();
+
 
 function sketchIt(p5) {
     let mapa;
     let cyclist;
     let ghost;
+
     // gui booleans
     let firstPersonView;
     let deemMap;
@@ -43,21 +49,21 @@ function sketchIt(p5) {
         latMax = 40.106182;
         lonMin = -88.228076;
         lonMax = -88.226213;
+        startTime = Date.now();
 
         //User's coordinates and mapped positions
         myCoord = p5.createVector(40.107546, -88.227257);
 
-        pos = fromLocToPosChambon(myCoord);
+        pos = fromLocToPos(myCoord);
         // Ghost's route 
-        routeDP.push(fromLocToPosChambon(p5.createVector(40.108804, -88.227606)));
-        routeDP.push(fromLocToPosChambon(p5.createVector(40.108818, -88.226828)));
-        routeDP.push(fromLocToPosChambon(p5.createVector(40.108024, -88.227474)));
-        routeDP.push(fromLocToPosChambon(p5.createVector(40.108024, -88.226841)));
-        routeDP.push(fromLocToPosChambon(p5.createVector(40.108020, -88.226846)));
-        routeDP.push(fromLocToPosChambon(p5.createVector(40.107895, -88.226827)));
-        routeDP.push(fromLocToPosChambon(p5.createVector(40.107302, -88.227565)));
-
-        routeDP.push(fromLocToPosChambon(p5.createVector(40.106297, -88.227527)));
+        routeDP.push(fromLocToPos(p5.createVector(40.108804, -88.227606)));
+        routeDP.push(fromLocToPos(p5.createVector(40.108818, -88.226828)));
+        routeDP.push(fromLocToPos(p5.createVector(40.108024, -88.227474)));
+        routeDP.push(fromLocToPos(p5.createVector(40.108024, -88.226841)));
+        routeDP.push(fromLocToPos(p5.createVector(40.108020, -88.226846)));
+        routeDP.push(fromLocToPos(p5.createVector(40.107895, -88.226827)));
+        routeDP.push(fromLocToPos(p5.createVector(40.107302, -88.227565)));
+        routeDP.push(fromLocToPos(p5.createVector(40.106297, -88.227527)));
 
 
         canvas = p5.createCanvas(p5.windowWidth, p5.windowHeight, p5.WEBGL);
@@ -71,7 +77,7 @@ function sketchIt(p5) {
         cyclist = new Cyclist(p5, pos.x, pos.y, cyclistHight)
         cyclist.initializeVectorField('radial', 3, p5.width, p5.height);
         // Instantiate ghost
-        ghost = new Fantasma(p5, 0, 50);
+        ghost = new Fantasma(p5, routeDP[0].x, routeDP[0].y);
         ghost.AddRoute(routeDP);
         // Graphics settings
         p5.smooth();
@@ -88,32 +94,39 @@ function sketchIt(p5) {
         //document.getElementById('chase').onclick = switchChase;
         //document.getElementById('ghostMode').onclick = switchGravitate;
         document.getElementById('fullscreen').onclick = fullscreenMode;
-        //window.addEventListener("deviceorientation", handleOrientation, true);
+        window.addEventListener("deviceorientation", handleOrientation, true);
         helpText = document.getElementById('help');
+        document.getElementById('captionSave').onclick = function() {
+            saveJSON = true;
+        };
+
+        output = document.getElementById('output');
 
     }
 
     p5.draw = function() {
         p5.background(200, 200, 255);
-        // camera and canvas rotation
-        if (firstPersonView) {
-            panoramic()
-        }
-        // mapa
-        if (deemMap) {
-            p5.tint(180, 10, 50, 126);
-        }
-        p5.image(mapa, -(mapWidth / 2), -(mapHight / 2))
+        if (sessionLive) {
+            // camera and canvas rotation
+            if (firstPersonView) {
+                panoramic()
+            }
+            // mapa
+            if (deemMap) {
+                p5.tint(180, 10, 50, 126);
+            }
+            p5.image(mapa, -(mapWidth / 2), -(mapHight / 2))
 
-        // vectorfield
-        cyclist.show(ghost)
-            //cyclist.chase(chase, ghost, 0.008)
-        pos = fromLocToPosChambon(myCoord);
-        gCoord = fromPosToLoc(ghost.pos)
-        cyclist.updatePosition(p5.createVector(pos.x, pos.y, cyclistHight))
+            // vectorfield
+            cyclist.show(ghost)
+                //cyclist.chase(chase, ghost, 0.008)
+            pos = fromLocToPosChambon(myCoord);
+            gCoord = fromPosToLoc(ghost.pos)
+            cyclist.updatePosition(p5.createVector(pos.x, pos.y, cyclistHight))
 
-        // ghost
-        ghost.show(p5, 2, 5); //0 = bounce, 1 = gravitate, 2 = follow route
+            // ghost
+            ghost.show(p5, 2, 2); //0 = bounce, 1 = gravitate, 2 = follow route
+        }
     }
 
     /*** CAMERA FUNCTIONS */
@@ -128,49 +141,27 @@ function sketchIt(p5) {
     }
     //The x and y here are exchange between the coordinates and the position because of the convention of lat/lon.
     function fromLocToPos(coors) {
-        let posX = p5.map(coors.lon, lonMin, lonMax, -(mapWidth / 2), (mapWidth / 2))
-        let posY = p5.map(coors.lat, latMin, latMax, -(mapHight / 2), (mapHight / 2))
-        return p5.createVector(posX, posY)
-    }
-
-    function fromLocToPosChambon(coors) {
         let posX = p5.map(coors.y, lonMin, lonMax, -(mapWidth / 2), (mapWidth / 2))
         let posY = p5.map(coors.x, latMin, latMax, -(mapHight / 2), (mapHight / 2))
         return p5.createVector(posX, posY)
     }
 
     function fromPosToLoc(pos) {
-        let lon = p5.map(pos.y, -(mapWidth / 2), (mapWidth / 2), lonMin, lonMax)
-        let lat = p5.map(pos.x, -(mapHight / 2), (mapHight / 2), latMin, latMax)
+        let lon = p5.map(pos.x, -(mapWidth / 2), (mapWidth / 2), lonMin, lonMax)
+        let lat = p5.map(pos.y, -(mapHight / 2), (mapHight / 2), latMin, latMax)
         return { lat: lat, lon: lon }
     }
-    /*
-    let camTargetX = p5.map(p5.mouseX, 0, p5.width, -1, 1) * proximity;
-        function settingMouseCamera(proximity) {
-        let camTargetY = p5.map(p5.mouseY, 0, p5.height, -1, 1) * proximity;
-        if (chase) {
-          camTargetX = cyclist.pos.x;
-          camTargetY = cyclist.pos.y;
-        } 
-        let camTargetZ = 0;
-        let camUPX = 0;
-        let camUPY = 0;
-        let camUPZ = -1;
-        p5.camera(posX, posY, headHight,
-          camTargetX, camTargetY, camTargetZ,
-          camUPX, camUPY, camUPZ);
-      }
-      */
 
     function settingRotationCamera(proximity) {
-        if (p5.rotationX < 10) {
-            proximity = 1;
-        } else if (p5.rotationX > 100) {
-            proximity = 400;
-        } else {
-            proximity = p5.map(p5.rotationX, 10, 100, 1, 400)
-        }
-        //helpText.innerHTML = "Rotation:"+p5.rotationZ+"<br>RotationReal:"+realAngle;
+        /***** THIS IS WEIRD *****/
+        // if (p5.rotationX < 10) {
+        //     proximity = 1;
+        // } else if (p5.rotationX > 100) {
+        //     proximity = 400;
+        // } else {
+        proximity = p5.map(p5.rotationX, 10, 100, 1, 400)
+            // }
+        output.innerHTML = ("Rotation:" + p5.rotationZ + "<br>RotationReal:" + realAngle);
 
         let oPosX = p5.cos(p5.radians(p5.rotationZ)) * proximity;
         let oPosY = p5.sin(p5.radians(p5.rotationZ)) * proximity;
@@ -236,7 +227,7 @@ function getLocation() {
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(showPosition);
     } else {
-        x.innerHTML = "Geolocation is not supported by this browser.";
+        output.innerHTML = "Geolocation is not supported by this browser.";
     }
 }
 
@@ -244,19 +235,34 @@ function showPosition(position) {
     lat = position.coords.latitude;
     lon = position.coords.longitude;
     myCoord = p5.createVector(lat, lon)
-    console.log("Current coordinates is:" + myCoord.x + "/ " + myCoord.y)
+    output.innerHTML = ("Current coordinates is:" + myCoord.x + "/ " + myCoord.y)
 }
 
 /** Sends data to server */
 var tid = setInterval(function() {
     if (document.readyState !== 'complete') return;
-    //clearInterval( tid );      
+
     getLocation();
     // do your work
     if (myCoord) {
-        socket.emit('message', { lat: myCoord.x, lon: myCoord.y }, gCoord, getEllapsedTime());
+        // socket.emit('message', );
+        let message = {
+            id: 0,
+            coord: { x: myCoord.x, y: myCoord.y },
+            gcoord: gCoord,
+            timeStamp: getEllapsedTime()
+        }
+        addToJson(message)
+
+        if (saveJSON) {
+            alert("You want to end your session?");
+            sessionLive = false;
+            saveSession("local");
+            clearInterval(tid);
+            document.getElementById('captionSave').innerHTML = " Trail Done! "
+        }
     }
-}, 100);
+}, 500);
 
 function coordinate(lat, lon) {
     this.lat = lat;
@@ -278,4 +284,17 @@ function handleOrientation(event) {
 
 function getEllapsedTime() {
     return Date.now() - startTime;
+}
+
+function addToJson(message) {
+
+    //    let id = message.id;
+    let timeStamp = message.timeStamp;
+
+    dataCoords.push({ "stamp": timeStamp, "coord": message.coord, "gcoord": message.gcoord });
+}
+
+function saveSession(id) {
+    myp5.saveJSON(dataCoords, "coords_" + id + ".json");
+    console.log('JSON saved')
 }

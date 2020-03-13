@@ -1,60 +1,29 @@
-// mpn install node, if node is not in the computer
-// npm init , to create pakcage.json
-// npm install express --save , to intall express in this project
-// at this point there should be: i) a folder node_modules, ii) a package-lock.json iii) express in the list of dependencies in package.json
-// npm install socket.io --save , to install socket.io. New dependency in pakages.json
-// Import Express to host a webpage
-
-/** La ultima vez que lo corrimos lo hicomos asi:
- * bash-3.2# node /Users/jsal/Documents/GitHub/ABMS_Bicycles/appSimulatorP5/server/index.js
- */
-
-var fs = require('fs');
-var http = require('http');
+// import socket libraries
 var https = require('https');
-
-var privateKey = fs.readFileSync('/Users/jsal/localhost-ssl/server.key', 'utf8');
-var certificate = fs.readFileSync('/Users/jsal/localhost-ssl/server.crt', 'utf8');
-let users = [];
-
-// var privateKey = fs.readFileSync('/Users/Dani/.localhost-ssl/localhost.key', 'utf8');
-// var certificate = fs.readFileSync('/Users/Dani/.localhost-ssl/localhost.crt', 'utf8');
-
-var credentials = {
-    key: privateKey,
-    cert: certificate,
-    requestCert: false,
-    rejectUnauthorized: false
-};
-
-var express = require('express');
-var app = express();
-
-// your express configuration here
-
-var httpServer = http.createServer(app);
-var httpsServer = https.createServer(credentials, app);
-var port = 3100;
-var server = httpsServer.listen(port);
-//httpsServer.listen(8443);
-console.log("Running code index.js. Port: " + port)
-
-
-// Run the server in port 8080
-//var server = app.listen(8080);
-
-// serve the folder 'public' whenever someone connects to this port
-//app.use(express.static('../navigator'))
-app.use(express.static('/Users/jsal/Documents/GitHub/ABMS_Bicycles/appSimulatorP5/navigator'))
-
-// import socket library
+var fs = require('fs');
 var socket = require("socket.io")
+
+// key and certificate
+var privateKey = fs.readFileSync('../ssl/keys/d76f2_cf5bf_c5972dce25e2cf13efe9ca98b5f1c284.key', 'utf8');
+var certificate = fs.readFileSync('../ssl/certs/socialviscosity_web_illinois_edu_d76f2_cf5bf_1591833599_c645c44194d6dba14d4b1d553cf469df.crt', 'utf8');
+
+// instantiate the server
+var server = https.createServer({ key: privateKey, cert: certificate }, (req, res) => {
+    res.writeHead(200);
+    res.end('hello world\n');
+}).listen(8080);
+
+
+// collection of clients
+let users = [];
 
 // server is just a function, so this is passed to socket as a parameter
 var io = socket.listen(server);
 
+console.log("socket listening")
+
 // Verify if you have a new connection
-io.sockets.on('connection', newConnection);
+io.on('connection', newConnection);
 
 //callback once a client is connected
 function newConnection(socket) {
