@@ -8,6 +8,8 @@ let saveJSON = false;
 let sessionLive = true;
 let dataCoords = [];
 let output;
+let speedSlider;
+
 //let url = 'https://socialviscosity.web.illinois.edu/smartBicycleSocket:8080' // IP of the machine running the server
 
 // communication
@@ -42,29 +44,13 @@ function sketchIt(p5) {
 
     p5.setup = function() {
 
-        //Set the dimentions of the map and the range of it's coordiantes
-        mapHight = 1900;
-        mapWidth = 1000;
-        latMin = 40.108897;
-        latMax = 40.106182;
-        lonMin = -88.228076;
-        lonMax = -88.226213;
-        startTime = Date.now();
+        mapSetup(p5);
 
         //User's coordinates and mapped positions
         myCoord = p5.createVector(40.107546, -88.227257);
-
         pos = fromLocToPos(myCoord);
-        // Ghost's route 
-        routeDP.push(fromLocToPos(p5.createVector(40.108804, -88.227606)));
-        routeDP.push(fromLocToPos(p5.createVector(40.108818, -88.226828)));
-        routeDP.push(fromLocToPos(p5.createVector(40.108024, -88.227474)));
-        routeDP.push(fromLocToPos(p5.createVector(40.108024, -88.226841)));
-        routeDP.push(fromLocToPos(p5.createVector(40.108020, -88.226846)));
-        routeDP.push(fromLocToPos(p5.createVector(40.107895, -88.226827)));
-        routeDP.push(fromLocToPos(p5.createVector(40.107302, -88.227565)));
-        routeDP.push(fromLocToPos(p5.createVector(40.106297, -88.227527)));
 
+        startTime = Date.now();
 
         canvas = p5.createCanvas(p5.windowWidth, p5.windowHeight, p5.WEBGL);
         canvas.position(0, 0);
@@ -73,18 +59,20 @@ function sketchIt(p5) {
         Utils.setP5(p5)
 
         //Instantiate the cyclist
-        //cyclist = new Cyclist(p5, posX, posY, cyclistHight)
         cyclist = new Cyclist(p5, pos.x, pos.y, cyclistHight)
         cyclist.initializeVectorField('radial', 3, p5.width, p5.height);
+
         // Instantiate ghost
         ghost = new Fantasma(p5, routeDP[0].x, routeDP[0].y);
         ghost.AddRoute(routeDP);
+
         // Graphics settings
         p5.smooth();
         p5.colorMode(p5.HSB)
         p5.textFont(myFont)
         p5.textSize(16)
-            // GUI
+
+        // GUI
         firstPersonView = true;
         deemMap = true;
         //chase = false;
@@ -94,14 +82,20 @@ function sketchIt(p5) {
         //document.getElementById('chase').onclick = switchChase;
         //document.getElementById('ghostMode').onclick = switchGravitate;
         document.getElementById('fullscreen').onclick = fullscreenMode;
-        window.addEventListener("deviceorientation", handleOrientation, true);
+
         helpText = document.getElementById('help');
         document.getElementById('captionSave').onclick = function() {
             saveJSON = true;
         };
 
+        // window.addEventListener("deviceorientation", handleOrientation, true);
+
         output = document.getElementById('output');
 
+        speedSlider = document.getElementById("speed");
+        speedSlider.oninput = function() {
+            document.getElementById('sliderLabel').innerHTML = speedSlider.value;
+        }
     }
 
     p5.draw = function() {
@@ -120,12 +114,12 @@ function sketchIt(p5) {
             // vectorfield
             cyclist.show(ghost)
                 //cyclist.chase(chase, ghost, 0.008)
-            pos = fromLocToPosChambon(myCoord);
+            pos = fromLocToPos(myCoord);
             gCoord = fromPosToLoc(ghost.pos)
             cyclist.updatePosition(p5.createVector(pos.x, pos.y, cyclistHight))
 
             // ghost
-            ghost.show(p5, 2, 2); //0 = bounce, 1 = gravitate, 2 = follow route
+            ghost.show(p5, 2, speedSlider.value); //0 = bounce, 1 = gravitate, 2 = follow route
         }
     }
 
@@ -161,7 +155,7 @@ function sketchIt(p5) {
         // } else {
         proximity = p5.map(p5.rotationX, 10, 100, 1, 400)
             // }
-        output.innerHTML = ("Rotation:" + p5.rotationZ + "<br>RotationReal:" + realAngle);
+            //rotationMessage.innerHTML = ("Rotation:" + p5.rotationZ + ", Rotation Real:" + realAngle);
 
         let oPosX = p5.cos(p5.radians(p5.rotationZ)) * proximity;
         let oPosY = p5.sin(p5.radians(p5.rotationZ)) * proximity;
@@ -205,6 +199,26 @@ function sketchIt(p5) {
             document.getElementById('chase').innerHTML = "Stop chasing the ghost"
         }
     }
+
+    function mapSetup(p5) {
+        //Set the dimentions of the map and the range of it's coordiantes
+        mapHight = 1900;
+        mapWidth = 1000;
+        latMin = 40.108897;
+        latMax = 40.106182;
+        lonMin = -88.228076;
+        lonMax = -88.226213;
+
+        // Ghost's route 
+        routeDP.push(fromLocToPos(p5.createVector(40.108804, -88.227606)));
+        routeDP.push(fromLocToPos(p5.createVector(40.108818, -88.226828)));
+        routeDP.push(fromLocToPos(p5.createVector(40.108024, -88.227474)));
+        routeDP.push(fromLocToPos(p5.createVector(40.108024, -88.226841)));
+        routeDP.push(fromLocToPos(p5.createVector(40.108020, -88.226846)));
+        routeDP.push(fromLocToPos(p5.createVector(40.107895, -88.226827)));
+        routeDP.push(fromLocToPos(p5.createVector(40.107302, -88.227565)));
+        routeDP.push(fromLocToPos(p5.createVector(40.106297, -88.227527)));
+    }
 }
 
 function fullscreenMode() {
@@ -235,7 +249,7 @@ function showPosition(position) {
     lat = position.coords.latitude;
     lon = position.coords.longitude;
     myCoord = p5.createVector(lat, lon)
-    output.innerHTML = ("Current coordinates is:" + myCoord.x + "/ " + myCoord.y)
+    output.innerHTML = ("Current coordinate: " + myCoord.x.toFixed(3) + " , " + myCoord.y.toFixed(3))
 }
 
 /** Sends data to server */
@@ -248,7 +262,7 @@ var tid = setInterval(function() {
         // socket.emit('message', );
         let message = {
             id: 0,
-            coord: { x: myCoord.x, y: myCoord.y },
+            coord: { lat: myCoord.x, lon: myCoord.y },
             gcoord: gCoord,
             timeStamp: getEllapsedTime()
         }
@@ -269,18 +283,19 @@ function coordinate(lat, lon) {
     this.lon = lon;
 }
 
-function handleOrientation(event) {
-    /*
-      if(event.webkitCompassHeading) {
-        realAngle = event.webkitCompassHeading;
-       }else{
-        realAngle    = event.alpha; //z axis rotation [0,360)
-       }
-       //helpText.style.color = "red";
-       */
-    realAngle = event.webkitCompassHeading; //z axis rotation [0,360)
+// function handleOrientation(event) {
+//     /*
+//       if(event.webkitCompassHeading) {
+//         realAngle = event.webkitCompassHeading;
+//        }else{
+//         realAngle    = event.alpha; //z axis rotation [0,360)
+//        }
+//        //helpText.style.color = "red";
+//        */
+//     //realAngle = event.webkitCompassHeading; //z axis rotation [0,360)
+//     output.innerHTML = ((360 - event.alpha) + ', absolute:' + event.absolute);
 
-}
+// }
 
 function getEllapsedTime() {
     return Date.now() - startTime;

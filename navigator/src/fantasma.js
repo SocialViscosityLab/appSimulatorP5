@@ -41,7 +41,8 @@ class Fantasma {
                 let difV = goalPos.copy()
                 difV.sub(this.pos)
                 if (difV.mag() >= speed) {
-                    let toMove = difV.normalize().mult(speed)
+                    let norm = difV.normalize();
+                    let toMove = norm.mult(parseFloat(speed));
                     this.pos.add(toMove)
                 } else {
                     this.currentGoal++;

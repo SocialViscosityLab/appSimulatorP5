@@ -21,6 +21,9 @@ class VectorField {
                 break;
             case 'radial':
                 this.initializeConcentric(this.density, 30);
+                break;
+            case 'single':
+                this.initializeSingle(3);
         }
         //console.log("vectors: " + this.vectors.length)
         this.sink = 10;
@@ -91,13 +94,23 @@ class VectorField {
         }
     }
 
+    initializeSingle = function(radius) {
+        this.radius = radius;
+        this.vectors = [];
+        //let angle = 0
+        //let pos = Utils.polarToCartesian(angle, this.radius);
+        let zOrig = 0;
+        let tmp = new Vector(this.orgX, this.orgY, zOrig);
+        this.vectors.push(tmp)
+    }
+
     show = function(p5, target) {
         for (let i = 0; i < this.vectors.length; i++) {
-            this.vectors[i].show(p5, target)
+            this.vectors[i].show(p5, target);
         }
     }
 
-    showSink = function() {
+    showSink = function(p5) {
         for (let i = 0; i < this.vectors.length - this.density; i++) {
             let row = p5.int(i / this.density)
             let cnt = (this.density * row) - 1 + this.density
@@ -108,12 +121,12 @@ class VectorField {
                 p5.vertex(this.vectors[i].x, this.vectors[i].y, this.vectors[i].z * this.sink)
                 p5.vertex(this.vectors[i + 1].x, this.vectors[i + 1].y, this.vectors[i + 1].z * this.sink)
                 p5.vertex(this.vectors[i + this.density + 1].x, this.vectors[i + this.density + 1].y, this.vectors[i + this.density + 1].z * this.sink)
-                p5.endShape(CLOSE)
+                p5.endShape(p5.CLOSE)
                 p5.beginShape()
                 p5.vertex(this.vectors[i].x, this.vectors[i].y, this.vectors[i].z * this.sink)
                 p5.vertex(this.vectors[i + this.density + 1].x, this.vectors[i + this.density + 1].y, this.vectors[i + this.density + 1].z * this.sink)
                 p5.vertex(this.vectors[i + this.density].x, this.vectors[i + this.density].y, this.vectors[i + this.density].z * this.sink)
-                p5.endShape(CLOSE)
+                p5.endShape(p5.CLOSE)
             }
         }
     }

@@ -32,11 +32,11 @@ class Cyclist {
         this.p5.translate(this.pos.x, this.pos.y, this.pos.z)
         this.p5.noStroke()
         this.p5.fill(0, 80, 100)
-        p5.rotateX(-Math.PI/2)
+        p5.rotateX(-Math.PI / 2)
         p5.noStroke
         p5.emissiveMaterial(200, 100, 80, 0.6)
-        p5.cylinder(10,3)
-        //this.p5.ellipse(0, 0, 20, 20)
+        p5.cylinder(10, 3)
+            //this.p5.ellipse(0, 0, 20, 20)
         this.p5.pop()
         this.p5.line(0, 0, this.p5.mouseX, this.p5.mouseY)
     }
@@ -46,7 +46,7 @@ class Cyclist {
         this.pos = pos;
         //this.vField.updatePosition(pos)
         this.vField.updateConcentric(pos)
-        //console.log(this.pos)
+            //console.log(this.pos)
 
     }
 }
