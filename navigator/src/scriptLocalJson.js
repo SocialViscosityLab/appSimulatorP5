@@ -26,8 +26,6 @@ function sketchIt(p5) {
     // gui booleans
     let firstPersonView;
     let deemMap;
-    let chase;
-    let gravitate;
 
     let mapHight, mapWidth;
     let latMin, latMax, lonMin, lonMax;
@@ -182,24 +180,6 @@ function sketchIt(p5) {
         deemMap = !deemMap
     }
 
-    function switchGravitate() {
-        gravitate = !gravitate;
-        if (!gravitate) {
-            document.getElementById('ghostMode').innerHTML = "Ghost Orbiting"
-        } else {
-            document.getElementById('ghostMode').innerHTML = "Ghost Bouncing"
-        }
-    }
-
-    function switchChase() {
-        chase = !chase;
-        if (!chase) {
-            document.getElementById('chase').innerHTML = "Chase the ghost"
-        } else {
-            document.getElementById('chase').innerHTML = "Stop chasing the ghost"
-        }
-    }
-
     function mapSetup(p5) {
         //Set the dimentions of the map and the range of it's coordiantes
         mapHight = 1900;
@@ -249,7 +229,7 @@ function showPosition(position) {
     lat = position.coords.latitude;
     lon = position.coords.longitude;
     myCoord = p5.createVector(lat, lon)
-    output.innerHTML = ("Current coordinate: " + myCoord.x.toFixed(3) + " , " + myCoord.y.toFixed(3))
+    output.innerHTML = ("lat: " + myCoord.x.toFixed(5) + " , lon:" + myCoord.y.toFixed(5))
 }
 
 /** Sends data to server */
@@ -283,26 +263,11 @@ function coordinate(lat, lon) {
     this.lon = lon;
 }
 
-// function handleOrientation(event) {
-//     /*
-//       if(event.webkitCompassHeading) {
-//         realAngle = event.webkitCompassHeading;
-//        }else{
-//         realAngle    = event.alpha; //z axis rotation [0,360)
-//        }
-//        //helpText.style.color = "red";
-//        */
-//     //realAngle = event.webkitCompassHeading; //z axis rotation [0,360)
-//     output.innerHTML = ((360 - event.alpha) + ', absolute:' + event.absolute);
-
-// }
-
 function getEllapsedTime() {
     return Date.now() - startTime;
 }
 
 function addToJson(message) {
-
     //    let id = message.id;
     let timeStamp = message.timeStamp;
 

@@ -1,3 +1,5 @@
+let noNorthNotified = false;
+
 // Check if device can provide absolute orientation data
 if (window.DeviceOrientationAbsoluteEvent) {
     window.addEventListener("DeviceOrientationAbsoluteEvent", deviceOrientationListener);
@@ -8,7 +10,6 @@ else if (window.DeviceOrientationEvent) {
 else {
     alert("Sorry, try again on a compatible mobile device!");
 }
-let noNorthNotified = false;
 
 function deviceOrientationListener(event) {
     document.getElementById('rotation').innerHTML = "something"
