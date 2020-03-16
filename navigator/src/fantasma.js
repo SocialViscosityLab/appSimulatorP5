@@ -69,4 +69,13 @@ class Fantasma {
         p5.cone(10, 20)
         p5.pop();
     };
+
+    showRoute(p5) {
+        for (let index = 0; index < this.route.length - 1; index++) {
+            const src = this.route[index];
+            const trgt = this.route[index + 1];
+            p5.line(src.x, src.y, trgt.x, trgt.y);
+
+        }
+    }
 }

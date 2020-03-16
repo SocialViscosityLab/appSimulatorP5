@@ -49,7 +49,7 @@ class SavePos {
 
     static setupInterval = function() {
         SavePos.interval = setInterval(function() {
-            ghost.followRoute("", 0.7)
+            ghost.followRoute("", 10)
                 // record
             let timeStamp = Utils.getEllapsedTime();
             let currentPos = { "lat": CurrentPos.pos.lat, "lon": CurrentPos.pos.lon }
@@ -60,59 +60,104 @@ class SavePos {
                 "coord": currentPos,
                 "gcoord": ghostPos
             });
+            // draw pGraphics
+            pGraphics.background(255, 10);
+            pGraphics.image(myMap, -pGraphics.width / 2, -pGraphics.height / 2)
+            ghost.show(pGraphics);
+            ghost.showRoute(pGraphics)
+
             // display record
             GUI.latLon.textContent = "Time: " + Utils.getEllapsedTime() + ', Latitude: ' + currentPos.lat + '°, Longitude: ' + currentPos.lon + '°';
             GUI.latLon.href = ('https://www.openstreetmap.org/#map=18/' + currentPos.lat + "/" + currentPos.lon);
             GUI.ghost.textContent = "Time: " + Utils.getEllapsedTime() + ', Latitude: ' + ghostPos.lat + '°, Longitude: ' + ghostPos.lon + '°';
-        }, 1000);
+        }, 500);
 
     }
 
     static saveSession = function() {
         Utils.p5.saveJSON(SavePos.dataCoords, "coords.json");
         clearInterval(SavePos.interval);
+        tracking = false;
         console.log('JSON saved')
         alert("session ended")
     }
+}
+
+function getRoute(object) {
+    let tmp = [];
+    for (let index = 0; index < object.geometry.coordinates.length; index++) {
+        const element = object.geometry.coordinates[index];
+        let tmp2 = SMap.fromLocToPos(Utils.p5.createVector(element[0], element[1]));
+        tmp.push(tmp2);
+    }
+    return tmp;
 }
 
 
 
 //********** MASTER INIT SEQUENCE *********/
 
-console.log("running start.js")
-
 let ghost;
+let pGraphics;
+let myMap;
+let tracking;
 
-// 1 Instantiate p5 and ghost
-function setup() {
-    Utils.setP5(this);
-    Utils.startTime = Date.now();
-    ghost = new Fantasma(Utils.p5, SMap.latMin, SMap.lonMin);
-    // Add route to ghost
-    ghost.AddRoute([
-        SMap.fromLocToPos(createVector(40.108804, -88.227606)),
-        SMap.fromLocToPos(createVector(40.108818, -88.226828)),
-        SMap.fromLocToPos(createVector(40.108024, -88.227474)),
-        SMap.fromLocToPos(createVector(40.108024, -88.226841)),
-        SMap.fromLocToPos(createVector(40.108020, -88.226846)),
-        SMap.fromLocToPos(createVector(40.107895, -88.226827)),
-        SMap.fromLocToPos(createVector(40.107302, -88.227565)),
-        SMap.fromLocToPos(createVector(40.106297, -88.227527)),
-    ]);
+function sketch(p5) {
+    console.log("running start.js")
+
+    let route;
+    let myFont;
+
+    p5.preload = function() {
+        //     // route = p5.loadJSON('../routes/quad2.json');
+        //     // myMap = p5.loadImage("../img/map_quad_HD.jpg");
+        route = p5.loadJSON('./routes/ikenberry.json');
+        myMap = p5.loadImage("./img/ikenberry.png");
+        myFont = p5.loadFont("./fonts/Roboto/Roboto-Medium.ttf")
+    }
+
+    // 1 Instantiate p5 and ghost
+    p5.setup = function() {
+        p5.createCanvas(1000, 570, p5.WEBGL)
+        Utils.setP5(this);
+        Utils.startTime = Date.now();
+        tracking = true;
+        // create ghost
+        let gLatLon = SMap.fromLocToPos(route.geometry.coordinates[0]);
+        ghost = new Fantasma(Utils.p5, gLatLon.x, gLatLon.y);
+        // Add route to ghost
+        ghost.AddRoute(getRoute(route));
+        // Create pgraphics
+        pGraphics = p5.createGraphics(p5.width, p5.height, p5.WEBGL);
+        p5.frameRate(10);
+        // Font settings
+        p5.textFont(myFont);
+        p5.textSize(50)
+    }
+
+    // 2 Map coordinates and boundaries are initiated in sMap static class
+
+    // 3 Instantiate the GPS
+    CurrentPos.setup()
+
+
+    // 5 Start a log of positions
+    SavePos.setupInterval()
+
+
+    // Event save  button
+    document.getElementById('save').onclick = function() {
+        SavePos.saveSession()
+    }
+
+    p5.draw = function() {
+        if (tracking) {
+            p5.image(pGraphics, -pGraphics.width / 2, -pGraphics.height / 2);
+        } else {
+            p5.background(0);
+            p5.text(" Position tracking over", -pGraphics.width / 2, 100 + -pGraphics.height / 2);
+        }
+    }
 }
 
-// 2 Map coordinates and boundaries are initiated in sMap static class
-
-// 3 Instantiate the GPS
-CurrentPos.setup()
-
-
-// 5 Start a log of positions
-SavePos.setupInterval()
-
-
-// Event save  button
-document.getElementById('save').onclick = function() {
-    SavePos.saveSession()
-}
+let globalP5 = new p5(sketch, 'sketchHolder')
