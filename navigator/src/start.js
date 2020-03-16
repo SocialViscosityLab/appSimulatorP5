@@ -50,15 +50,20 @@ class SavePos {
     static setupInterval = function() {
         SavePos.interval = setInterval(function() {
             ghost.followRoute("", 0.7)
-                // do your work
+                // record
+            let timeStamp = Utils.getEllapsedTime();
+            let currentPos = { "lat": CurrentPos.pos.lat, "lon": CurrentPos.pos.lon }
+            let ghostPos = SMap.fromPosToLoc(ghost.pos)
+                // store record
             SavePos.dataCoords.push({
-                "stamp": Utils.getEllapsedTime(),
-                "coord": { "lat": CurrentPos.pos.lat, "lon": CurrentPos.pos.lon },
-                "gcoord": SMap.fromPosToLoc(ghost.pos)
+                "stamp": timeStamp,
+                "coord": currentPos,
+                "gcoord": ghostPos
             });
-            GUI.latLon.textContent = "Time: " + Utils.getEllapsedTime() + ', Latitude: ' + CurrentPos.pos.lat + '°, Longitude: ' + CurrentPos.pos.lon + '°';
-            GUI.latLon.href = ('https://www.openstreetmap.org/#map=18/' + CurrentPos.pos.lat + "/" + CurrentPos.pos.lon);
-            GUI.ghost.textContent = "Time: " + Utils.getEllapsedTime() + ', Latitude: ' + ghost.pos.x + '°, Longitude: ' + ghost.pos.y + '°';
+            // display record
+            GUI.latLon.textContent = "Time: " + Utils.getEllapsedTime() + ', Latitude: ' + currentPos.lat + '°, Longitude: ' + currentPos.lon + '°';
+            GUI.latLon.href = ('https://www.openstreetmap.org/#map=18/' + currentPos.lat + "/" + currentPos.lon);
+            GUI.ghost.textContent = "Time: " + Utils.getEllapsedTime() + ', Latitude: ' + ghostPos.lat + '°, Longitude: ' + ghostPos.lon + '°';
         }, 1000);
 
     }
