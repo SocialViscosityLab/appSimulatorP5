@@ -7,82 +7,6 @@ class GUI {
 }
 
 
-class CurrentPos {
-
-    static pos = { "lat": undefined, "lon": undefined }
-    static watchID = undefined;
-    static geo_options = {
-        enableHighAccuracy: true,
-        //milliseconds of a possible cached position that is acceptable to return
-        maximumAge: 3000,
-        //the maximum length of time (in milliseconds) the device is allowed to take in order to return a position
-        timeout: 7000
-    };
-
-
-    static success =
-        function(position) {
-            CurrentPos.pos.lat = position.coords.latitude;
-            CurrentPos.pos.lon = position.coords.longitude;
-            GUI.status.textContent = 'GPS OK';
-        }
-
-    static error = function() {
-        GUI.status.textContent = 'Unable to retrieve your location';
-    }
-
-    static setup = function() {
-        // getting the position
-        if (!navigator.geolocation) {
-            GUI.status.textContent = 'Geolocation is not supported by your browser';
-        } else {
-            GUI.status.textContent = 'Locating…';
-            //callback is called multiple times, allowing the browser to either update your location as you move, or provide a more accurate location as different techniques are used to geolocate you.
-            GUI.watchID = navigator.geolocation.watchPosition(CurrentPos.success, CurrentPos.error, CurrentPos.geo_options);
-        }
-    }
-}
-
-class SavePos {
-    static dataCoords = [];
-    static interval;
-
-    static setupInterval = function() {
-        SavePos.interval = setInterval(function() {
-            ghost.followRoute("", 10)
-                // record
-            let timeStamp = Utils.getEllapsedTime();
-            let currentPos = { "lat": CurrentPos.pos.lat, "lon": CurrentPos.pos.lon }
-            let ghostPos = SMap.fromPosToLoc(ghost.pos)
-                // store record
-            SavePos.dataCoords.push({
-                "stamp": timeStamp,
-                "coord": currentPos,
-                "gcoord": ghostPos
-            });
-            // draw pGraphics
-            pGraphics.background(255, 10);
-            pGraphics.image(myMap, -pGraphics.width / 2, -pGraphics.height / 2)
-            ghost.show(pGraphics);
-            ghost.showRoute(pGraphics)
-
-            // display record
-            GUI.latLon.textContent = "Time: " + Utils.getEllapsedTime() + ', Latitude: ' + currentPos.lat + '°, Longitude: ' + currentPos.lon + '°';
-            GUI.latLon.href = ('https://www.openstreetmap.org/#map=18/' + currentPos.lat + "/" + currentPos.lon);
-            GUI.ghost.textContent = "Time: " + Utils.getEllapsedTime() + ', Latitude: ' + ghostPos.lat + '°, Longitude: ' + ghostPos.lon + '°';
-        }, 500);
-
-    }
-
-    static saveSession = function() {
-        Utils.p5.saveJSON(SavePos.dataCoords, "coords.json");
-        clearInterval(SavePos.interval);
-        tracking = false;
-        console.log('JSON saved')
-        alert("session ended")
-    }
-}
-
 function getRoute(object) {
     let tmp = [];
     for (let index = 0; index < object.geometry.coordinates.length; index++) {
@@ -101,6 +25,7 @@ let ghost;
 let pGraphics;
 let myMap;
 let tracking;
+let device;
 
 function sketch(p5) {
     console.log("running start.js")
@@ -119,14 +44,27 @@ function sketch(p5) {
     // 1 Instantiate p5 and ghost
     p5.setup = function() {
         p5.createCanvas(1000, 570, p5.WEBGL)
+
+        // *** UTILS ****
         Utils.setP5(this);
         Utils.startTime = Date.now();
+
+        // **** DEVICE ****
+        device = new DevicePos();
+        device.setup();
+
         tracking = true;
-        // create ghost
+
+        // **** GHOST ****
         let gLatLon = SMap.fromLocToPos(route.geometry.coordinates[0]);
         ghost = new Fantasma(Utils.p5, gLatLon.x, gLatLon.y);
         // Add route to ghost
         ghost.AddRoute(getRoute(route));
+
+        // **** UPDATE INTERVAL ****
+        SavePos.setupInterval()
+
+        // **** GRAPHICS ****
         // Create pgraphics
         pGraphics = p5.createGraphics(p5.width, p5.height, p5.WEBGL);
         p5.frameRate(10);
@@ -135,21 +73,7 @@ function sketch(p5) {
         p5.textSize(50)
     }
 
-    // 2 Map coordinates and boundaries are initiated in sMap static class
-
-    // 3 Instantiate the GPS
-    CurrentPos.setup()
-
-
-    // 5 Start a log of positions
-    SavePos.setupInterval()
-
-
-    // Event save  button
-    document.getElementById('save').onclick = function() {
-        SavePos.saveSession()
-    }
-
+    // dislay map
     p5.draw = function() {
         if (tracking) {
             p5.image(pGraphics, -pGraphics.width / 2, -pGraphics.height / 2);
@@ -158,6 +82,54 @@ function sketch(p5) {
             p5.text(" Position tracking over", -pGraphics.width / 2, 100 + -pGraphics.height / 2);
         }
     }
+
+    // Event save  button
+    document.getElementById('save').onclick = function() {
+        SavePos.saveSession()
+    }
 }
+
+
+class SavePos {
+    static dataCoords = [];
+    static interval;
+
+    static setupInterval = function() {
+        SavePos.interval = setInterval(function() {
+            ghost.followRoute("", 10)
+                // record
+            let timeStamp = Utils.getEllapsedTime();
+            let currentPos = { "lat": device.pos.lat, "lon": device.pos.lon }
+            let ghostPos = SMap.fromPosToLoc(ghost.pos)
+                // store record
+            SavePos.dataCoords.push({
+                "stamp": timeStamp,
+                "coord": currentPos,
+                "gcoord": ghostPos
+            });
+            // draw pGraphics
+            pGraphics.background(255, 10);
+            pGraphics.image(myMap, -pGraphics.width / 2, -pGraphics.height / 2)
+            ghost.show(pGraphics);
+            ghost.showRoute(pGraphics)
+
+            // display record
+            GUI.status.textContent = device.status;
+            GUI.latLon.textContent = "Time: " + Utils.getEllapsedTime() + ', Latitude: ' + currentPos.lat + '°, Longitude: ' + currentPos.lon + '°';
+            GUI.latLon.href = ('https://www.openstreetmap.org/#map=18/' + currentPos.lat + "/" + currentPos.lon);
+            GUI.ghost.textContent = "Time: " + Utils.getEllapsedTime() + ', Latitude: ' + ghostPos.lat + '°, Longitude: ' + ghostPos.lon + '°';
+        }, 500);
+
+    }
+
+    static saveSession = function() {
+        Utils.p5.saveJSON(SavePos.dataCoords, "coords.json");
+        clearInterval(SavePos.interval);
+        tracking = false;
+        console.log('JSON saved')
+        alert("session ended")
+    }
+}
+
 
 let globalP5 = new p5(sketch, 'sketchHolder')
