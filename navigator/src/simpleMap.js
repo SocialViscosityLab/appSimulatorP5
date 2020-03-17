@@ -1,69 +1,57 @@
-class SMap {
-
-    // QUAD
-    // static specs = {
-    //     "file": "img/map_quad_HD.jpg",
-    //     "mapHeight": 1900,
-    //     "mapWidth": 1000,
-    //     "latMin": 40.108897,
-    //     "latMax": 40.106182,
-    //     "lonMin": -88.228076,
-    //     "lonMax": -88.226213
-    // }
-
-    // IKENBERRY
-    static specs = {
-        "file": "img/ikenberrySM.gif",
-        "mapHeight": 570,
-        "mapWidth": 1000,
-        "latMin": 40.104178408488494,
-        "latMax": 40.101564679660264,
-        "lonMin": -88.23928826255725,
-        "lonMax": -88.23318891925739
+class SimpleMap {
+    constructor(_pGraphics, _image, _north, _south, _west, _east) {
+        this.pGraphics;
+        this.image = _image;
+        this.mapHeight = _image.height;
+        this.mapWidth = _image.width;
+        this.north = _north;
+        this.south = _south;
+        this.east = _east;
+        this.west = _west;
+        console.log("Map setup with image size  W:" + _image.width + ", H: " + _image.height)
     }
 
-    static specs2 = {
-        "file": "img/ikenberrySM.gif",
-        "mapHeight": 570,
-        "mapWidth": 1000,
-        "north": 40.104178408488494,
-        "south": 40.101564679660264,
-        "east": -88.23928826255725,
-        "west": -88.23318891925739
-    }
-
-    //The x and y here are exchange between the coordinates and the position because of the convention of lat/lon.
-    static fromLocToPos(coors) {
-        let posX = Utils.p5.map(coors.y, SMap.specs.lonMin, SMap.specs.lonMax, -(SMap.specs.mapWidth / 2), (SMap.specs.mapWidth / 2))
-        let posY = Utils.p5.map(coors.x, SMap.specs.latMin, SMap.specs.latMax, -(SMap.specs.mapHeight / 2), (SMap.specs.mapHeight / 2))
-        return Utils.p5.createVector(posX, posY)
-    }
-
-    static fromPosToLoc(pos) {
-        let lon = Utils.p5.map(pos.x, -(SMap.specs.mapWidth / 2), (SMap.specs.mapWidth / 2), SMap.specs.lonMin, SMap.specs.lonMax)
-        let lat = Utils.p5.map(pos.y, -(SMap.specs.mapHeight / 2), (SMap.specs.mapHeight / 2), SMap.specs.latMin, SMap.specs.latMax)
-        return { "lat": lat, "lon": lon }
-    }
-
-    static getCenterMapCoords() {
-        let midLon = (SMap.specs.lonMax + SMap.specs.lonMin) / 2;
-        let midLat = (SMap.specs.latMax + SMap.specs.latMin) / 2;
+    getCenterMapCoords = function() {
+        let midLon = (this.west + this.east) / 2;
+        let midLat = (this.south + this.north) / 2;
         return [midLat, midLon]
     }
 
-    static lonLatToXY(lonLat) {
-        let x;
-        let y;
-        if (SMap.specs2.east < lonLat.lon && lonLat.lon < SMap.specs2.west) {
-            x = Utils.p5.map(lonLat.lon, SMap.specs2.west, SMap.specs2.east, (SMap.specs2.mapWidth / 2), -(SMap.specs2.mapWidth / 2))
+    XYToLonLat = function(XY, asP5Vector) {
+
+        let lon = Utils.p5.map(XY.x, (this.mapWidth / 2), -(this.mapWidth / 2), this.west, this.east)
+        let lat = Utils.p5.map(XY.y, (this.mapHeight / 2), -(this.mapHeight / 2), this.south, this.north)
+
+        if (asP5Vector) {
+            return Utils.p5.createVector(lon, lat)
         } else {
-            console.log(" Lon beyond boudaries, " + lonLat.lon)
+            return { lon, lat }
         }
-        if (SMap.specs2.south < lonLat.lat && lonLat.lat < SMap.specs2.north) {
-            y = Utils.p5.map(lonLat.lat, SMap.specs2.south, SMap.specs2.north, (SMap.specs2.mapHeight / 2), -(SMap.specs2.mapHeight / 2))
+    }
+
+    lonLatToXY = function(lonLat, asP5Vector) {
+
+        if (Array.isArray(lonLat)) {
+            lonLat = { lat: lonLat[0], lon: lonLat[1] }
+        }
+
+        if (this.west > lonLat.lon || lonLat.lon > this.east) {
+            console.log(" Lon beyond boundaries, " + lonLat.lon)
+        }
+        let x = Utils.p5.map(lonLat.lon, this.east, this.west, (this.mapWidth / 2), -(this.mapWidth / 2))
+        if (this.south > lonLat.lat || lonLat.lat > this.north) {
+            console.log(" Lat beyond boundaries, " + lonLat.lat)
+        }
+        let y = Utils.p5.map(lonLat.lat, this.south, this.north, (this.mapHeight / 2), -(this.mapHeight / 2))
+        if (asP5Vector) {
+            return Utils.p5.createVector(x, y)
         } else {
-            console.log(" Lat beyond boudaries, " + lonLat.lat)
+            return { x, y }
         }
-        return { x, y }
+    }
+
+    show = function() {
+        this.pGraphics.background(255, 10);
+        this.pGraphics.image(this.image, -pGraphics.width / 2, -pGraphics.height / 2)
     }
 }

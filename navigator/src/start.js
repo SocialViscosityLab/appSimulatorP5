@@ -5,7 +5,8 @@ let ghost, cyclist, device;
 
 let pGraphics;
 
-let myMap;
+let mapImage;
+let sMap;
 let route;
 
 let dataCoords = [];
@@ -20,16 +21,18 @@ function sketch(p5) {
     let myFont;
 
     p5.preload = function() {
-        // route = p5.loadJSON('../routes/quad2.json');
-        // myMap = p5.loadImage("../img/map_quad_HD.jpg");
-        route = p5.loadJSON('./routes/ikenberry.json');
-        myMap = p5.loadImage("./img/ikenberry.png");
+        route = p5.loadJSON('./routes/ikenberry.json')
+        mapImage = p5.loadImage("./img/ikenberry.png", function(val) {
+            // **** MAP ****
+            // instantiate simple amp andset the boundaries of the map
+            sMap = new SimpleMap(undefined, val, 40.103852453920026, 40.1012315395875, -88.23941313195974, -88.23332451749593) // north, south, west, east
+        });
         myFont = p5.loadFont("./fonts/Roboto/Roboto-Medium.ttf")
     }
 
     // 1 Instantiate p5 and ghost
     p5.setup = function() {
-        p5.createCanvas(1000, 570, p5.WEBGL)
+        p5.createCanvas(1000, 870, p5.WEBGL)
 
         // *** UTILS ****
         Utils.setP5(this);
@@ -39,30 +42,32 @@ function sketch(p5) {
         device = new DevicePos();
         device.setup();
 
-        tracking = true;
-
         // **** CYCLIST ****
-        let centerMap = SMap.getCenterMapCoords();
-        let cyclistXY = SMap.lonLatToXY({ lat: centerMap[0], lon: centerMap[1] });
-        cyclist = new Cyclist(p5, cyclistXY.x, cyclistXY.y, 20);
+        cyclist = new Cyclist(p5, 0, 0, 20);
         cyclist.initializeVectorField('radial', 2, p5.width, p5.height);
 
         // **** GHOST ****
         let routeStart = { lat: route.geometry.coordinates[0][0], lon: route.geometry.coordinates[0][1] }
-        let gXY = SMap.lonLatToXY(routeStart);
+        let gXY = sMap.lonLatToXY(routeStart, "asPVector");
         ghost = new Fantasma(Utils.p5, gXY.x, gXY.y);
         ghost.AddRoute(getRoute(route));
 
         // **** UPDATE INTERVAL ****
+        // This interval controls the update pace of the entire APP except p5's draw() function
         setupInterval(500)
 
         // **** GRAPHICS ****
         // Create pgraphics
-        pGraphics = p5.createGraphics(p5.width, p5.height, p5.WEBGL);
-        //p5.frameRate(10);
+        pGraphics = p5.createGraphics(sMap.mapWidth, sMap.mapHeight, p5.WEBGL);
+        // set the pGraphics into the map
+        sMap.pGraphics = pGraphics;
+
         // Font settings
         p5.textFont(myFont);
         p5.textSize(50)
+
+        // GUI boolean
+        tracking = true;
     }
 
     // display map, ghost and cyclist
@@ -75,7 +80,6 @@ function sketch(p5) {
             p5.background(0);
             p5.text(" Position tracking over", -pGraphics.width / 2, 100 + -pGraphics.height / 2);
         }
-        //cyclist.updatePosition(ghost.pos)
     }
 
     function panoramic() {
@@ -84,7 +88,7 @@ function sketch(p5) {
         p5.rotateZ(p5.map(p5.mouseX, 0, p5.width, -Math.PI, Math.PI));
         // camera
         //settingMouseCamera(headHight);
-        settingRotationCamera(260)
+        // settingRotationCamera(260)
     }
 
     function settingRotationCamera(proximity) {
@@ -115,36 +119,37 @@ function setupInterval(millis) {
     updateInterval = setInterval(function() {
             // update ghost
             ghost.followRoute("", 3); // "", speed
-            // record values
-            let timeStamp = Utils.getEllapsedTime();
-            let currentPos = { "lat": device.pos.lat, "lon": device.pos.lon }
-            let ghostPos = SMap.fromPosToLoc(ghost.pos);
+
+            // update cyclists
+            cyclist.updatePosition(sMap.lonLatToXY(device.pos))
+
             // store record
             dataCoords.push({
-                "stamp": timeStamp,
-                "coord": currentPos,
-                "gcoord": ghostPos
+                "stamp": Utils.getEllapsedTime(),
+                "coord": { "lat": device.pos.lat, "lon": device.pos.lon },
+                "gcoord": sMap.XYToLonLat(ghost.pos)
             });
+
             // update pGraphics
-            pGraphics.background(255, 10);
-            pGraphics.image(myMap, -pGraphics.width / 2, -pGraphics.height / 2)
+            sMap.show();
             ghost.show(pGraphics);
             ghost.showRoute(pGraphics)
-                //cyclist.updatePosition(Utils.p5.createVector(currentPos.lon, currentPos.lat, 20))
             cyclist.show(pGraphics, ghost)
 
             // update device status on GUI
             GUI.status.textContent = device.status;
-            GUI.latLon.textContent = "Time: " + Utils.getEllapsedTime() + ', Latitude: ' + currentPos.lat + '°, Longitude: ' + currentPos.lon + '°';
-            GUI.latLon.href = ('https://www.openstreetmap.org/#map=18/' + currentPos.lat + "/" + currentPos.lon);
-            GUI.ghost.textContent = "Time: " + Utils.getEllapsedTime() + ', Latitude: ' + ghostPos.lat + '°, Longitude: ' + ghostPos.lon + '°';
+            GUI.latLon.textContent = "Time: " + Utils.getEllapsedTime() + ', Latitude: ' + device.pos.lat + '°, Longitude: ' + device.pos.lon + '°';
+            GUI.latLon.href = ('https://www.openstreetmap.org/#map=18/' + device.pos.lat + "/" + device.pos.lon);
+            GUI.ghost.textContent = "Time: " + Utils.getEllapsedTime() + ', Latitude: ' + sMap.XYToLonLat(ghost.pos).lat + '°, Longitude: ' + sMap.XYToLonLat(ghost.pos).lon + '°';
         },
         millis);
 
 }
 
 function saveSession() {
-    Utils.p5.saveJSON(dataCoords, "coords.json");
+    let now = new Date();
+    now = now.getDay() + "-" + now.getHours() + "-" + now.getMinutes() + "-" + now.getSeconds();
+    Utils.p5.saveJSON(dataCoords, now + ".json");
     clearInterval(updateInterval);
     tracking = false;
     console.log('JSON saved')
@@ -155,7 +160,7 @@ function getRoute(object) {
     let tmp = [];
     for (let index = 0; index < object.geometry.coordinates.length; index++) {
         const element = object.geometry.coordinates[index];
-        let tmp2 = SMap.fromLocToPos(Utils.p5.createVector(element[0], element[1]));
+        let tmp2 = sMap.lonLatToXY(element, "asP5Vector")
         tmp.push(tmp2);
     }
     return tmp;

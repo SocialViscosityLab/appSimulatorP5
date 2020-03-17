@@ -1,0 +1,19 @@
+{
+  "type": "Feature",
+  "properties": {
+    "name": "limits"
+  },
+  "geometry": {
+    "type": "LineString",
+    "coordinates": [
+      [
+        40.1012915395875,
+        -88.23332451749593
+      ],
+      [
+        40.103872453920026,
+        -88.23941313195974
+      ]
+    ]
+  }
+}
