@@ -135,8 +135,9 @@ class VectorField {
         for (let i = 0; i < this.vectors.length; i++) {
             this.vectors[i].updatePosition(newPos)
         }
-        //console.log("Field origin x:"+this.orgX)
-        //console.log("Field origin y:"+this.orgY)
+
+        // console.log("Field origin x:" + this.orgX)
+        // console.log("Field origin y:" + this.orgY)
     }
 
     updateConcentric = function(newPos) {

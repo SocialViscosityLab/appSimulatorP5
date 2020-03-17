@@ -13,6 +13,9 @@
  * setup there is a variable OBJ. That is a placeholder for the instance. How is the placeholder linked
  * to the instance? I DO NOT KNOW. More info here: https://www.jstips.co/en/javascript/passing-arguments-to-callback-functions/
  * */
+
+// from https://developer.mozilla.org/en-US/docs/Web/API/Geolocation_API/Using_the_Geolocation_API
+
 class DevicePos {
 
     constructor() {
@@ -37,7 +40,7 @@ class DevicePos {
         } else {
             this.status = 'Locating…';
             //callback is called multiple times, allowing the browser to either update your location as you move, or provide a more accurate location as different techniques are used to geolocate you.
-            this.watchID = navigator.geolocation.watchPosition(this.success.bind(obj, this), this.error, this.geo_options);
+            this.watchID = navigator.geolocation.watchPosition(this.success.bind(obj, this), this.error.bind(obj), this.geo_options);
         }
     }
 
@@ -47,8 +50,8 @@ class DevicePos {
         obj.status = 'GPS OK';
     }
 
-    error() {
-        DevicePos.instance.status = 'Unable to retrieve your location';
+    error(obj) {
+        obj.status = 'Unable to retrieve your location';
     }
 
     getPos() {

@@ -4,13 +4,11 @@ class Vector extends p5.Vector {
         this.elevation = 1;
     }
 
-    updatePosition(newPos){
+    updatePosition(newPos) {
         this.set(newPos)
-       
-
     }
 
-    show = function (p5, target, radius) {
+    show = function(p5, target, radius) {
         this.z = p5.map(p5.dist(this.x, this.y, target.x, target.y), 0, 600, 0, 1)
         let mag = 10 + this.z * 40
         if (radius) {
@@ -27,8 +25,8 @@ class Vector extends p5.Vector {
 
     customShape(p5, target) {
         let col = p5.map(this.z, 0, 1, 20, 360)
-        // fill(col, 70, 50);
-        //noFill();
+            // fill(col, 70, 50);
+            //noFill();
         p5.fill(col, 20, 100)
         p5.noStroke();
         let angle = Utils.getHeading(this.x, this.y, target.x, target.y) - Math.PI / 2
@@ -52,12 +50,12 @@ class Vector extends p5.Vector {
         p5.vertex(7, -3);
         // vertex(this.z * (k / 5) , this.z * (k / 2));
         p5.endShape()
-        //line(0, 0,target.x - width/2, target.y - height/2)//fill(0)
+            //line(0, 0,target.x - width/2, target.y - height/2)//fill(0)
         p5.pop()
-        //     let rad = dist(this.x, this.y, target.x, target.y)
-        //    // arc(target.x, target.y,rad, rad,-PI/5, PI/5)
-        //     angle = Utils.getHeading(this.x, this.y, target.x, target.y) - PI / 2
-        //  let end = Utils.polarToCartesian(angle - PI/2, rad)
+            //     let rad = dist(this.x, this.y, target.x, target.y)
+            //    // arc(target.x, target.y,rad, rad,-PI/5, PI/5)
+            //     angle = Utils.getHeading(this.x, this.y, target.x, target.y) - PI / 2
+            //  let end = Utils.polarToCartesian(angle - PI/2, rad)
 
         //text(this.z,0,0)
         // line(this.x, this.y,target.x , target.y )

@@ -7,8 +7,7 @@ class Cyclist {
 
     initializeVectorField(mode, n) {
         this.vField = new VectorField(this.p5, mode, n, p5.width, p5.height);
-        this.vField.updatePosition(this.p5.createVector(this.pos.x, this.pos.y, this.pos.z))
-
+        this.vField.updateConcentric(this.pos)
     }
 
     chase(enabled, ghost, lerpMag) {
@@ -26,19 +25,21 @@ class Cyclist {
         return this.p5.createVector(x, y, z);
     }
 
-    show(ghost) {
-        this.vField.show(this.p5, ghost.pos)
-        this.p5.push()
-        this.p5.translate(this.pos.x, this.pos.y, this.pos.z)
-        this.p5.noStroke()
-        this.p5.fill(0, 80, 100)
-        p5.rotateX(-Math.PI / 2)
-        p5.noStroke
-        p5.emissiveMaterial(200, 100, 80, 0.6)
-        p5.cylinder(10, 3)
-            //this.p5.ellipse(0, 0, 20, 20)
-        this.p5.pop()
-        this.p5.line(0, 0, this.p5.mouseX, this.p5.mouseY)
+    show(renderer, ghost) {
+        renderer.push()
+        this.vField.show(renderer, ghost.pos)
+        renderer.pop()
+            // renderer.push()
+            // renderer.translate(this.pos.x, this.pos.y, this.pos.z)
+            // renderer.noStroke()
+            // renderer.fill(0, 80, 100)
+            // renderer.rotateX(-Math.PI / 2)
+            // renderer.noStroke()
+            // renderer.emissiveMaterial(200, 100, 80, 0.6)
+            // renderer.cylinder(10, 3)
+            //     //this.p5.ellipse(0, 0, 20, 20)
+            // renderer.pop()
+            //renderer.line(0, 0, this.p5.mouseX, this.p5.mouseY)
     }
 
     updatePosition(pos) {
