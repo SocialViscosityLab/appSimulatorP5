@@ -1,6 +1,5 @@
 class SimpleMap {
-    constructor(_pGraphics, _image, _north, _south, _west, _east) {
-        this.pGraphics;
+    constructor(_image, _north, _south, _west, _east) {
         this.image = _image;
         this.mapHeight = _image.height;
         this.mapWidth = _image.width;
@@ -50,8 +49,8 @@ class SimpleMap {
         }
     }
 
-    show = function() {
-        this.pGraphics.background(255, 10);
-        this.pGraphics.image(this.image, -pGraphics.width / 2, -pGraphics.height / 2)
+    show = function(renderer) {
+        renderer.background(255, 10);
+        renderer.image(this.image, -pGraphics.width / 2, -pGraphics.height / 2)
     }
 }

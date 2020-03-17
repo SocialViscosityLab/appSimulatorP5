@@ -5,7 +5,7 @@ let ghost, cyclist, device;
 
 let pGraphics;
 
-let mapImage;
+
 let sMap;
 let route;
 
@@ -22,17 +22,17 @@ function sketch(p5) {
 
     p5.preload = function() {
         route = p5.loadJSON('./routes/ikenberry.json')
-        mapImage = p5.loadImage("./img/ikenberry.png", function(val) {
+        p5.loadImage("./img/ikenberry.png", function(val) {
             // **** MAP ****
             // instantiate simple amp andset the boundaries of the map
-            sMap = new SimpleMap(undefined, val, 40.103852453920026, 40.1012315395875, -88.23941313195974, -88.23332451749593) // north, south, west, east
+            sMap = new SimpleMap(val, 40.103852453920026, 40.1012315395875, -88.23941313195974, -88.23332451749593) // north, south, west, east
         });
         myFont = p5.loadFont("./fonts/Roboto/Roboto-Medium.ttf")
     }
 
     // 1 Instantiate p5 and ghost
     p5.setup = function() {
-        p5.createCanvas(1000, 870, p5.WEBGL)
+        p5.createCanvas(p5.windowWidth, p5.windowHeight, p5.WEBGL)
 
         // *** UTILS ****
         Utils.setP5(this);
@@ -43,7 +43,7 @@ function sketch(p5) {
         device.setup();
 
         // **** CYCLIST ****
-        cyclist = new Cyclist(p5, 0, 0, 20);
+        cyclist = new Cyclist(p5, 0, 0, 100);
         cyclist.initializeVectorField('radial', 2, p5.width, p5.height);
 
         // **** GHOST ****
@@ -72,10 +72,16 @@ function sketch(p5) {
 
     // display map, ghost and cyclist
     p5.draw = function() {
-        p5.background(255)
-        panoramic();
+        p5.background(205);
+
+        //panoramic(); //enable to test rotation with mouse
+        // camera
+        settingRotationCamera(20);
+
         if (tracking) {
-            p5.image(pGraphics, -pGraphics.width / 2, -pGraphics.height / 2);
+            //  p5.image(pGraphics, -pGraphics.width / 2, -pGraphics.height / 2);
+            p5.fill(255, 0, 0)
+            p5.ellipse(0, 0, 300, 300)
         } else {
             p5.background(0);
             p5.text(" Position tracking over", -pGraphics.width / 2, 100 + -pGraphics.height / 2);
@@ -86,16 +92,18 @@ function sketch(p5) {
         //rotate
         p5.rotateX(p5.map(p5.mouseY, 0, p5.width, -Math.PI / 2, Math.PI / 2));
         p5.rotateZ(p5.map(p5.mouseX, 0, p5.width, -Math.PI, Math.PI));
-        // camera
-        //settingMouseCamera(headHight);
-        // settingRotationCamera(260)
     }
 
     function settingRotationCamera(proximity) {
-        GUI.rotX.textContent = p5.rotationX;
-        GUI.rotY.textContent = p5.rotationY;
-        GUI.rotZ.textContent = p5.rotationZ;
-        proximity = p5.map(p5.rotationX, 10, 100, 1, 400)
+        // proximity is how far is the camera looking at. It is somehow the head inclination angle in relation to the horizon
+        if (p5.rotationX < 10) {
+            proximity = 1;
+        } else if (p5.rotationX > 100) {
+            proximity = 400;
+        } else {
+            proximity = p5.map(p5.rotationX, 10, 100, 1, 400)
+        }
+
         let oPosX = p5.cos(p5.radians(p5.rotationZ)) * proximity;
         let oPosY = p5.sin(p5.radians(p5.rotationZ)) * proximity;
         let camTargetZ = 10;
@@ -103,6 +111,11 @@ function sketch(p5) {
         let camUPY = 0;
         let camUPZ = -1;
         p5.camera(cyclist.pos.x, cyclist.pos.y, GUI.camHeight.value, cyclist.pos.x - oPosX, cyclist.pos.y + oPosY, camTargetZ, camUPX, camUPY, camUPZ);
+
+        // GUI
+        GUI.rotX.textContent = p5.rotationX;
+        GUI.rotY.textContent = p5.rotationY;
+        GUI.rotZ.textContent = p5.rotationZ;
     }
 
     // Event save  button
@@ -131,7 +144,7 @@ function setupInterval(millis) {
             });
 
             // update pGraphics
-            sMap.show();
+            sMap.show(pGraphics);
             ghost.show(pGraphics);
             ghost.showRoute(pGraphics)
             cyclist.show(pGraphics, ghost)

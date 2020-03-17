@@ -27,27 +27,15 @@ class Cyclist {
 
     show(renderer, ghost) {
         renderer.push()
-        this.vField.show(renderer, ghost.pos)
+            //this.vField.show(renderer, ghost.pos)
+        renderer.stroke(0, 216, 255);
+        renderer.fill(255, 0, 225);
+        renderer.ellipse(0, 0, 20, 20);
         renderer.pop()
-            // renderer.push()
-            // renderer.translate(this.pos.x, this.pos.y, this.pos.z)
-            // renderer.noStroke()
-            // renderer.fill(0, 80, 100)
-            // renderer.rotateX(-Math.PI / 2)
-            // renderer.noStroke()
-            // renderer.emissiveMaterial(200, 100, 80, 0.6)
-            // renderer.cylinder(10, 3)
-            //     //this.p5.ellipse(0, 0, 20, 20)
-            // renderer.pop()
-            //renderer.line(0, 0, this.p5.mouseX, this.p5.mouseY)
     }
 
     updatePosition(pos) {
-        //this.pos.add(pos)
         this.pos = pos;
-        //this.vField.updatePosition(pos)
-        this.vField.updateConcentric(pos)
-            //console.log(this.pos)
-
+        this.vField.updateConcentric(pos);
     }
 }

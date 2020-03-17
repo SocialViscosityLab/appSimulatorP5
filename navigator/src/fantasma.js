@@ -60,6 +60,22 @@ class Fantasma {
             this.followRoute(p5, value)
         }
         p5.push();
+        p5.fill(0, 216, 255);
+        p5.stroke(255);
+        p5.translate(this.pos.x, this.pos.y, 4);
+        p5.ellipse(0, 0, 30, 30);
+        p5.pop();
+    };
+
+    show3D(p5, mode, value) {
+        if (mode == 0) {
+            this.gravitate(value);
+        } else if (mode == 1) {
+            this.bounce(p5);
+        } else if (mode == 2) {
+            this.followRoute(p5, value)
+        }
+        p5.push();
         p5.fill(125, 100, 100);
         p5.translate(this.pos.x, this.pos.y, 4);
         //p5.rotateZ(-Math.PI/2)
