@@ -32,7 +32,7 @@ function sketch(p5) {
 
     // 1 Instantiate p5 and ghost
     p5.setup = function() {
-        p5.createCanvas(p5.windowWidth, p5.windowHeight, p5.WEBGL)
+        p5.createCanvas(2290, 1306, p5.WEBGL)
 
         // *** UTILS ****
         Utils.setP5(this);
@@ -59,8 +59,11 @@ function sketch(p5) {
         // **** GRAPHICS ****
         // Create pgraphics
         pGraphics = p5.createGraphics(sMap.mapWidth, sMap.mapHeight, p5.WEBGL);
-        // set the pGraphics into the map
-        sMap.pGraphics = pGraphics;
+        // console.log(sMap.mapWidth + "  " + sMap.mapHeight)
+        // pGraphics.background(100, 100)
+        // pGraphics.fill(0, 255, 0)
+        // pGraphics.stroke(0)
+        // pGraphics.line(0, 0, 100, 100)
 
         // Font settings
         p5.textFont(myFont);
@@ -74,18 +77,19 @@ function sketch(p5) {
     p5.draw = function() {
         p5.background(205);
 
-        //panoramic(); //enable to test rotation with mouse
-        // camera
-        settingRotationCamera(20);
-
         if (tracking) {
-            //  p5.image(pGraphics, -pGraphics.width / 2, -pGraphics.height / 2);
+            p5.image(pGraphics, -pGraphics.width / 2, -pGraphics.height / 2);
+
             p5.fill(255, 0, 0)
             p5.ellipse(0, 0, 300, 300)
+                //p5.image(pGraphics, 0, 0);
         } else {
             p5.background(0);
             p5.text(" Position tracking over", -pGraphics.width / 2, 100 + -pGraphics.height / 2);
         }
+        //panoramic(); //enable to test rotation with mouse
+        // camera
+        //settingRotationCamera(20);
     }
 
     function panoramic() {
@@ -145,6 +149,7 @@ function setupInterval(millis) {
 
             // update pGraphics
             sMap.show(pGraphics);
+            //pGraphics.image(sMap.image, 0, 0)
             ghost.show(pGraphics);
             ghost.showRoute(pGraphics)
             cyclist.show(pGraphics, ghost)
