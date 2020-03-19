@@ -49,8 +49,7 @@ class GCamera {
     }
 
     /** Positions the camera at the X,Y,Z parameters and looks from that viewpoint around  */
-    semiOrbital_lookingFrom_mouse(_x, _y, _z) {
-        let radiusToTarget = 100;
+    semiOrbital_lookingFrom_mouse(_x, _y, _z, radiusToTarget) {
         // get mouse coord normalized
         let nMouse = this.getNormalizedMouse("centered");
         // amplify by PI to get an angle 
@@ -60,28 +59,8 @@ class GCamera {
         let yCom = this.p5.sin(nMouse.x) * radiusToTarget;
         // use mouse Y component to control camera height
         let zCom = this.p5.cos(nMouse.y) * radiusToTarget;
-        console.log(zCom)
         this.cam.camera(_x, _y, _z, xCom, yCom, zCom, 0, 0, -1);
     }
-
-    // settingRotationCamera(proximity) {
-    //     if (this.p5.rotationX < 10) {
-    //         proximity = 1;
-    //     } else if (this.p5.rotationX > 100) {
-    //         proximity = 400;
-    //     } else {
-    //         proximity = this.p5.map(this.p5.rotationX, 10, 100, 1, 400)
-    //     }
-    //     //helpText.innerHTML = "Rotation:"+this.p5.rotationZ+"<br>RotationReal:"+realAngle;
-
-    //     let oPosX = this.p5.cos(this.p5.radians(this.p5.rotationZ)) * proximity;
-    //     let oPosY = this.p5.sin(this.p5.radians(this.p5.rotationZ)) * proximity;
-    //     let camTargetZ = 10;
-    //     let camUPX = 0;
-    //     let camUPY = 0;
-    //     let camUPZ = -1;
-    //     this.p5.camera(pos.x, pos.y, headHight, pos.x - oPosX, pos.y + oPosY, camTargetZ, camUPX, camUPY, camUPZ);
-    // }
 
     /** The camera attached to the mouse moves around Z axis. 
      * Left right extremes flaten perspective. Target could be specified
@@ -115,6 +94,30 @@ class GCamera {
             mVector = this.p5.createVector(this.p5.map(this.p5.mouseX, 0, this.p5.width, 0, 1), this.p5.map(this.p5.mouseY, 0, this.p5.height, 0, 1))
         }
         return mVector;
+    }
+
+    /******** GYROSCOPE FUNCTIONS *********/
+
+    // settingRotationCamera(proximity) {
+
+    //     //helpText.innerHTML = "Rotation:"+this.p5.rotationZ+"<br>RotationReal:"+realAngle;
+
+
+    // }
+
+    /** Positions the camera at the X,Y,Z parameters and looks from that viewpoint around  */
+    semiOrbital_lookingFrom_gyro(_x, _y, _z, radiusToTarget) {
+        if (this.p5.rotationX < 10) {
+            radiusToTarget = 1;
+        } else if (this.p5.rotationX > 100) {
+            radiusToTarget = 400;
+        } else {
+            radiusToTarget = this.p5.map(this.p5.rotationX, 10, 100, 1, 400)
+        }
+        let oPosX = this.p5.cos(this.p5.radians(-this.p5.rotationZ)) * radiusToTarget;
+        let oPosY = this.p5.sin(this.p5.radians(-this.p5.rotationZ)) * radiusToTarget;
+        let camTargetZ = 10;
+        this.p5.camera(_x, _y, _z, oPosX, oPosY, camTargetZ, 0, 0, -1);
     }
 
     /** Utility method. This method reduces the scale of the object 

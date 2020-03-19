@@ -10,7 +10,8 @@ let sMap;
 let route;
 
 let dataCoords = [];
-let camera1;
+let camera1; // controlled by mouse
+let isMobile;
 // the update interval
 let updateInterval;
 // boolean starts with true
@@ -58,8 +59,15 @@ function sketch(p5) {
         setupInterval(500)
 
         // **** CAMERA ****/
-        camera1 = new GCamera(p5);
+        camera1 = new GCamera(p5); // controlled by mouse
         p5.setCamera(camera1.cam);
+        isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        if (isMobile) {
+            GUI.mobile.textContent = "running on mobile"
+        } else {
+            GUI.mobile.textContent = "running on computer"
+
+        }
 
         // **** GRAPHICS ****
         // Create pgraphics
@@ -77,21 +85,24 @@ function sketch(p5) {
     p5.draw = function() {
         p5.background(205);
 
-        // CAMERA
-        // A mouseX controls 360 spin around Z, mouseY controls above or below horizon
-        // camera1.cylindrical_lookingAt_mouse(600);
-        // B spin mouse around canvas center spins camera around Z, mouse on top, left rihght extremes flaten perspective 
-        // camera1.semiOrbital_lookingAt_mouse(600, p5.createVector(ghost.pos.x, ghost.pos.y, 0));
-        // C spin mouse around target
-        // camera1.semiOrbital_lookingFrom_mouse(0, 0, 100)
-        // D Simpliest  
-        camera1.fromLookingAt(p5.createVector(cyclist.pos.x, cyclist.pos.y, 250), ghost.pos);
+        if (!isMobile) {
+            // CAMERA MOUSE
+            // A mouseX controls 360 spin around Z, mouseY controls above or below horizon
+            // camera1.cylindrical_lookingAt_mouse(600);
+            // B spin mouse around canvas center spins camera around Z, mouse on top, left rihght extremes flaten perspective 
+            // camera1.semiOrbital_lookingAt_mouse(600, p5.createVector(ghost.pos.x, ghost.pos.y, 0));
+            // C spin mouse around position
+            camera1.semiOrbital_lookingFrom_mouse(0, 0, 100, 100);
+            // D Simpliest  
+            // camera1.fromLookingAt(p5.createVector(cyclist.pos.x, cyclist.pos.y, 250), ghost.pos);
+        } else {
+            // CAMERA MOBILE
+            camera1.semiOrbital_lookingFrom_gyro(0, 0, 200);
+            p5.rotateZ(p5.PI / 2);
+        }
 
-        //camera1.showAxes();
+        // camera1.showAxes();
 
-        p5.noFill();
-        p5.circle(0, 0, 500);
-        //p5.box(100)
         //  cyclist.show(p5, ghost)
         if (tracking) {
             p5.image(pGraphics, -pGraphics.width / 2, -pGraphics.height / 2);
@@ -100,9 +111,7 @@ function sketch(p5) {
             p5.text(" Position tracking over", -pGraphics.width / 2, 100 + -pGraphics.height / 2);
         }
 
-        GUI.rotX.textContent = p5.rotationX;
-        GUI.rotY.textContent = p5.rotationY;
-        GUI.rotZ.textContent = p5.rotationZ;
+        GUI.rotation.textContent = "x: " + p5.rotationX.toFixed(2) + ", y:" + p5.rotationY.toFixed(2) + ", z:" + p5.rotationZ.toFixed(2);
     }
 
     // Event save  button

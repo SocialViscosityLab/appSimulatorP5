@@ -15,7 +15,5 @@ window.addEventListener('deviceorientation', function(evt) {
     if (alpha < 0) {
         alpha += 360;
     }
-    console.log(alpha)
-    document.getElementById('rotation').innerHTML = alpha;
     // Now use use alpha
 }, false)
