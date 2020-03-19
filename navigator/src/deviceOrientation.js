@@ -1,31 +1,21 @@
-let noNorthNotified = false;
+/**https://www.sitepoint.com/using-device-orientation-html5/ and 
+https://www.w3.org/2008/geolocation/wiki/images/e/e0/Device_Orientation_%27alpha%27_Calibration-_Implementation_Status_and_Challenges.pdf
+*/
+var initialOffset = null;
+console.log("device orientation")
 
-// Check if device can provide absolute orientation data
-if (window.DeviceOrientationAbsoluteEvent) {
-    window.addEventListener("DeviceOrientationAbsoluteEvent", deviceOrientationListener);
-} // If not, check if the device sends any orientation data
-else if (window.DeviceOrientationEvent) {
-    window.addEventListener("deviceorientation", deviceOrientationListener);
-} // Send an alert if the device isn't compatible
-else {
-    alert("Sorry, try again on a compatible mobile device!");
-}
-
-function deviceOrientationListener(event) {
-    document.getElementById('rotation').innerHTML = "something"
-    var alpha = event.alpha; //z axis rotation [0,360)
-    var beta = event.beta; //x axis rotation [-180, 180]
-    var gamma = event.gamma; //y axis rotation [-90, 90]      //Check if absolute values have been sent
-    if (typeof event.webkitCompassHeading !== "undefined") {
-        alpha = event.webkitCompassHeading; //iOS non-standard
-        var heading = alpha
-        document.getElementById('rotation').innerHTML = heading.toFixed([0]);
-    } else {
-        if (!noNorthNotified) {
-            alert("Your device is reporting relative alpha values, so this compass won't point north :(");
-            noNorthNotified = true;
-        }
-        var heading = 360 - alpha; //heading [0, 360)
-        document.getElementById('rotation').innerHTML = heading.toFixed([0]);
+window.addEventListener('deviceorientation', function(evt) {
+    console.log("device orientation")
+    if (initialOffset === null && evt.absolute !== true && +evt.webkitCompassAccuracy > 0 && +evt.webkitCompassAccuracy < 50) {
+        initialOffset = evt.webkitCompassHeading || 0;
+    } else if (initialOffset === null) {
+        initialOffset = evt.alpha;
     }
-}
+    var alpha = evt.alpha - initialOffset;
+    if (alpha < 0) {
+        alpha += 360;
+    }
+    console.log(alpha)
+    document.getElementById('rotation').innerHTML = alpha;
+    // Now use use alpha
+}, false)

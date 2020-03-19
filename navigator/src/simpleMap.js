@@ -35,11 +35,11 @@ class SimpleMap {
         }
 
         if (this.west > lonLat.lon || lonLat.lon > this.east) {
-            console.log(" Lon beyond boundaries, " + lonLat.lon)
+            //     console.log(" Lon beyond boundaries, " + lonLat.lon)
         }
         let x = Utils.p5.map(lonLat.lon, this.east, this.west, (this.mapWidth / 2), -(this.mapWidth / 2))
         if (this.south > lonLat.lat || lonLat.lat > this.north) {
-            console.log(" Lat beyond boundaries, " + lonLat.lat)
+            //     console.log(" Lat beyond boundaries, " + lonLat.lat)
         }
         let y = Utils.p5.map(lonLat.lat, this.south, this.north, (this.mapHeight / 2), -(this.mapHeight / 2))
         if (asP5Vector) {

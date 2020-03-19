@@ -10,6 +10,7 @@ let sMap;
 let route;
 
 let dataCoords = [];
+let camera1;
 // the update interval
 let updateInterval;
 // boolean starts with true
@@ -22,7 +23,7 @@ function sketch(p5) {
 
     p5.preload = function() {
         route = p5.loadJSON('./routes/ikenberry.json')
-        p5.loadImage("./img/ikenberry.png", function(val) {
+        p5.loadImage("./img/ikenberry1365.png", function(val) {
             // **** MAP ****
             // instantiate simple amp andset the boundaries of the map
             sMap = new SimpleMap(val, 40.103852453920026, 40.1012315395875, -88.23941313195974, -88.23332451749593) // north, south, west, east
@@ -32,7 +33,7 @@ function sketch(p5) {
 
     // 1 Instantiate p5 and ghost
     p5.setup = function() {
-        p5.createCanvas(2290, 1306, p5.WEBGL)
+        p5.createCanvas(p5.windowWidth, p5.windowHeight, p5.WEBGL)
 
         // *** UTILS ****
         Utils.setP5(this);
@@ -56,18 +57,17 @@ function sketch(p5) {
         // This interval controls the update pace of the entire APP except p5's draw() function
         setupInterval(500)
 
+        // **** CAMERA ****/
+        camera1 = new GCamera(p5);
+        p5.setCamera(camera1.cam);
+
         // **** GRAPHICS ****
         // Create pgraphics
-        pGraphics = p5.createGraphics(sMap.mapWidth, sMap.mapHeight, p5.WEBGL);
-        // console.log(sMap.mapWidth + "  " + sMap.mapHeight)
-        // pGraphics.background(100, 100)
-        // pGraphics.fill(0, 255, 0)
-        // pGraphics.stroke(0)
-        // pGraphics.line(0, 0, 100, 100)
+        pGraphics = p5.createGraphics(sMap.image.width, sMap.image.height, p5.WEBGL);
 
         // Font settings
         p5.textFont(myFont);
-        p5.textSize(50)
+        p5.textSize(50);
 
         // GUI boolean
         tracking = true;
@@ -77,46 +77,29 @@ function sketch(p5) {
     p5.draw = function() {
         p5.background(205);
 
+        // CAMERA
+        // A mouseX controls 360 spin around Z, mouseY controls above or below horizon
+        // camera1.cylindrical_lookingAt_mouse(600);
+        // B spin mouse around canvas center spins camera around Z, mouse on top, left rihght extremes flaten perspective 
+        // camera1.semiOrbital_lookingAt_mouse(600, p5.createVector(ghost.pos.x, ghost.pos.y, 0));
+        // C spin mouse around target
+        // camera1.semiOrbital_lookingFrom_mouse(0, 0, 100)
+        // D Simpliest  
+        camera1.fromLookingAt(p5.createVector(cyclist.pos.x, cyclist.pos.y, 250), ghost.pos);
+
+        //camera1.showAxes();
+
+        p5.noFill();
+        p5.circle(0, 0, 500);
+        //p5.box(100)
+        //  cyclist.show(p5, ghost)
         if (tracking) {
             p5.image(pGraphics, -pGraphics.width / 2, -pGraphics.height / 2);
-
-            p5.fill(255, 0, 0)
-            p5.ellipse(0, 0, 300, 300)
-                //p5.image(pGraphics, 0, 0);
         } else {
             p5.background(0);
             p5.text(" Position tracking over", -pGraphics.width / 2, 100 + -pGraphics.height / 2);
         }
-        //panoramic(); //enable to test rotation with mouse
-        // camera
-        //settingRotationCamera(20);
-    }
 
-    function panoramic() {
-        //rotate
-        p5.rotateX(p5.map(p5.mouseY, 0, p5.width, -Math.PI / 2, Math.PI / 2));
-        p5.rotateZ(p5.map(p5.mouseX, 0, p5.width, -Math.PI, Math.PI));
-    }
-
-    function settingRotationCamera(proximity) {
-        // proximity is how far is the camera looking at. It is somehow the head inclination angle in relation to the horizon
-        if (p5.rotationX < 10) {
-            proximity = 1;
-        } else if (p5.rotationX > 100) {
-            proximity = 400;
-        } else {
-            proximity = p5.map(p5.rotationX, 10, 100, 1, 400)
-        }
-
-        let oPosX = p5.cos(p5.radians(p5.rotationZ)) * proximity;
-        let oPosY = p5.sin(p5.radians(p5.rotationZ)) * proximity;
-        let camTargetZ = 10;
-        let camUPX = 0;
-        let camUPY = 0;
-        let camUPZ = -1;
-        p5.camera(cyclist.pos.x, cyclist.pos.y, GUI.camHeight.value, cyclist.pos.x - oPosX, cyclist.pos.y + oPosY, camTargetZ, camUPX, camUPY, camUPZ);
-
-        // GUI
         GUI.rotX.textContent = p5.rotationX;
         GUI.rotY.textContent = p5.rotationY;
         GUI.rotZ.textContent = p5.rotationZ;
@@ -138,7 +121,7 @@ function setupInterval(millis) {
             ghost.followRoute("", 3); // "", speed
 
             // update cyclists
-            cyclist.updatePosition(sMap.lonLatToXY(device.pos))
+            // cyclist.updatePosition(sMap.lonLatToXY(device.pos))
 
             // store record
             dataCoords.push({
@@ -147,9 +130,8 @@ function setupInterval(millis) {
                 "gcoord": sMap.XYToLonLat(ghost.pos)
             });
 
-            // update pGraphics
+            // // update pGraphics
             sMap.show(pGraphics);
-            //pGraphics.image(sMap.image, 0, 0)
             ghost.show(pGraphics);
             ghost.showRoute(pGraphics)
             cyclist.show(pGraphics, ghost)
