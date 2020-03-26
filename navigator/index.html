@@ -2,8 +2,31 @@
 
     <head>
         <script src="libs/p5.min.js" type="text/javascript"></script>
-
-
+        <style>
+            ul {
+                list-style-type: none;
+                margin: 0;
+                padding: 0;
+                overflow: hidden;
+                background-color: #888888;
+            }
+            
+            li {
+                float: left;
+            }
+            
+            li a {
+                display: block;
+                color: white;
+                text-align: center;
+                padding: 16px;
+                text-decoration: none;
+            }
+            
+            li a:hover {
+                background-color: #111111;
+            }
+        </style>
     </head>
 
     <body>
@@ -11,16 +34,21 @@
         <a id="map-link">link</a>
         <div id="rotation">rotation</div>
         <div id="mobile">mobile</div>
-
-
         <hr>
 
-        <p>Ghost</p>
+        <div>Ghost</div>
         <div id="ghost">ghost</div>
-        <hr>
-        <div>Camera height
-            <input type="range" id="camHeight" name="camHeight" min="60" max="1400" step="10" value="1000">
-        </div>
+        <ul>
+            <li>
+                <a id="slow">Slow</a>
+            </li>
+            <li>
+                <a id="medium">Medium</a>
+            </li>
+            <li>
+                <a id="fast">Fast</a>
+            </li>
+        </ul>
         <hr>
         <div>
             <button id="save" name="save"><label for="save">End session and save JSON</label>

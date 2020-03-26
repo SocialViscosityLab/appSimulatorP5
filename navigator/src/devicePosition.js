@@ -12,9 +12,8 @@
  * passed as a reference to itself but as a 'independent variable'. That is why within the scope of
  * setup there is a variable OBJ. That is a placeholder for the instance. How is the placeholder linked
  * to the instance? I DO NOT KNOW. More info here: https://www.jstips.co/en/javascript/passing-arguments-to-callback-functions/
+ * // from https://developer.mozilla.org/en-US/docs/Web/API/Geolocation_API/Using_the_Geolocation_API
  * */
-
-// from https://developer.mozilla.org/en-US/docs/Web/API/Geolocation_API/Using_the_Geolocation_API
 
 class DevicePos {
 
@@ -31,6 +30,7 @@ class DevicePos {
         };
     }
 
+    /** This MUST be invoked to activate the instance  */
     setup = function() {
         // a variable holding THIS object
         let obj;
@@ -44,17 +44,21 @@ class DevicePos {
         }
     }
 
+    /** Callback */
     success = function(obj, position) {
         obj.pos.lat = position.coords.latitude;
         obj.pos.lon = position.coords.longitude;
         obj.status = 'GPS OK';
     }
 
+    /**Callback*/
     error(obj) {
-        obj.status = 'Unable to retrieve your location';
-    }
-
+            obj.status = 'Unable to retrieve your location';
+        }
+        /** Retruns the status and position
+         * @return Object with status and pos objects
+         */
     getPos() {
-        return { "status": DevicePos.instance.status, "pos": DevicePos.instance.pos }
+        return { "status": this.status, "pos": this.pos }
     }
 }

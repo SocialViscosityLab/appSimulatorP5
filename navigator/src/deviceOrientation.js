@@ -2,7 +2,6 @@
 https://www.w3.org/2008/geolocation/wiki/images/e/e0/Device_Orientation_%27alpha%27_Calibration-_Implementation_Status_and_Challenges.pdf
 */
 var initialOffset = null;
-console.log("device orientation")
 
 window.addEventListener('deviceorientation', function(evt) {
     console.log("device orientation")
