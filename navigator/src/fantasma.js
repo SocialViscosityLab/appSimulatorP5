@@ -53,13 +53,14 @@ class Fantasma {
     }
 
     show(p5, mode, value) {
+        /* 
         if (mode == 0) {
             this.gravitate(value);
         } else if (mode == 1) {
             this.bounce(p5);
         } else if (mode == 2) {
             this.followRoute(p5, value)
-        }
+        } */
         p5.push();
         p5.fill(0, 216, 255);
         p5.stroke(255);
@@ -96,8 +97,6 @@ class Fantasma {
         }
     }
     updatePosition(pos){
-        console.log("new ghost position");
-        console.log(pos)
         this.pos = pos;
     }
 }
