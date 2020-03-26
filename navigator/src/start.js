@@ -27,9 +27,12 @@ function sketch(p5) {
         // route = p5.loadJSON('./routes/ikenberry.json');
         // limits = p5.loadJSON("./routes/ikenberryLimits.json");
         // p5.loadImage("./img/ikenberry1365.png", function(val) {
-        route = p5.loadJSON('./routes/urbanaHome.json')
-        limits = p5.loadJSON("./routes/urbanaHomeLimits.json")
-        p5.loadImage("./img/urbanaHome1000.png", function(val) {
+        // route = p5.loadJSON('./routes/urbanaHome.json')
+        // limits = p5.loadJSON("./routes/urbanaHomeLimits.json")
+        // p5.loadImage("./img/urbanaHome1000.png", function(val) {
+        route = p5.loadJSON('./routes/urbanaExtendido.json')
+        limits = p5.loadJSON("./routes/urbanaExtendidoLimits.json")
+        p5.loadImage("./img/urbanaExtendido.png", function(val) {
             // **** MAP ****
             // instantiate simple amp andset the boundaries of the map
             sMap = new SimpleMap(val, limits);
