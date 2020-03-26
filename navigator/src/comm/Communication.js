@@ -38,7 +38,7 @@ class Communication{
     var sessions = db.collection("journeys").doc(journeyId).collection("sessions").doc("00000")
     .onSnapshot(function(doc){
           let ghostCurrentPosition = doc.data().current_ghost_position;
-          console.log(ghostCurrentPosition)
+          //console.log(ghostCurrentPosition)
           ghostCoords = {lat: ghostCurrentPosition.latitude, lon: ghostCurrentPosition.longitude}
           return ghostCurrentPosition;
         })

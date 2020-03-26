@@ -154,7 +154,8 @@ function setupInterval(millis) {
     updateInterval = setInterval(function() {
 
         // update ghost
-        ghost.followRoute("", speed); // "", speed
+        //ghost.followRoute("", speed); // "", speed
+        ghost.updatePosition(sMap.lonLatToXY(ghostCoords, "asPVector"));
 
         // update cyclists
         cyclist.updatePosition(sMap.lonLatToXY(device.pos));

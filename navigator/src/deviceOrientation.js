@@ -4,7 +4,7 @@ https://www.w3.org/2008/geolocation/wiki/images/e/e0/Device_Orientation_%27alpha
 var initialOffset = null;
 
 window.addEventListener('deviceorientation', function(evt) {
-    console.log("device orientation")
+    //console.log("device orientation")
     if (initialOffset === null && evt.absolute !== true && +evt.webkitCompassAccuracy > 0 && +evt.webkitCompassAccuracy < 50) {
         initialOffset = evt.webkitCompassHeading || 0;
     } else if (initialOffset === null) {
