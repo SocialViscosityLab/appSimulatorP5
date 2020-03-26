@@ -1,5 +1,6 @@
 class Fantasma {
     constructor(_p5, _x, _y) {
+        this.p5 = _p5;
         this.pos = _p5.createVector(_x, _y);
         this.going = true;
         this.pAngle = 0;
@@ -93,5 +94,10 @@ class Fantasma {
             p5.line(src.x, src.y, trgt.x, trgt.y);
 
         }
+    }
+    updatePosition(pos){
+        console.log("new ghost position");
+        console.log(pos)
+        this.pos = pos;
     }
 }

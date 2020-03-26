@@ -2,6 +2,7 @@
 
 // The ghost, cyclists and cyclists's device
 let ghost, cyclist, device;
+let ghostCoords;
 
 let pGraphics;
 
@@ -16,6 +17,9 @@ let isMobile;
 let updateInterval;
 // boolean starts with true
 let tracking;
+
+//The intance of the communication
+let comm;
 
 function sketch(p5) {
     console.log("running start.js")
@@ -34,6 +38,8 @@ function sketch(p5) {
 
     // 1 Instantiate p5 and ghost
     p5.setup = function() {
+        comm = new Communication();
+      
         p5.createCanvas(p5.windowWidth, p5.windowHeight, p5.WEBGL)
 
         // *** UTILS ****
@@ -49,8 +55,9 @@ function sketch(p5) {
         cyclist.initializeVectorField('radial', 2, p5.width, p5.height);
 
         // **** GHOST ****
-        let routeStart = { lat: route.geometry.coordinates[0][0], lon: route.geometry.coordinates[0][1] }
-        let gXY = sMap.lonLatToXY(routeStart, "asPVector");
+        //let routeStart = { lat: route.geometry.coordinates[0][0], lon: route.geometry.coordinates[0][1] }
+        ghostCoords = { lat: route.geometry.coordinates[0][0], lon: route.geometry.coordinates[0][1] }
+        let gXY = sMap.lonLatToXY(ghostCoords, "asPVector");
         ghost = new Fantasma(Utils.p5, gXY.x, gXY.y);
         ghost.AddRoute(getRoute(route));
 
@@ -111,7 +118,7 @@ function sketch(p5) {
             p5.text(" Position tracking over", -pGraphics.width / 2, 100 + -pGraphics.height / 2);
         }
 
-        GUI.rotation.textContent = "x: " + p5.rotationX.toFixed(2) + ", y:" + p5.rotationY.toFixed(2) + ", z:" + p5.rotationZ.toFixed(2);
+        //GUI.rotation.textContent = "x: " + p5.rotationX.toFixed(2) + ", y:" + p5.rotationY.toFixed(2) + ", z:" + p5.rotationZ.toFixed(2);
     }
 
     // Event save  button
@@ -143,6 +150,7 @@ function setupInterval(millis) {
             sMap.show(pGraphics);
             ghost.show(pGraphics);
             ghost.showRoute(pGraphics)
+            ghost.updatePosition(sMap.lonLatToXY(ghostCoords, "asPVector"))
             cyclist.show(pGraphics, ghost)
 
             // update device status on GUI
