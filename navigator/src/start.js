@@ -56,11 +56,14 @@ function sketch(p5) {
 
         // **** GHOST ****
 <<<<<<< HEAD
+<<<<<<< HEAD
         //let routeStart = { lat: route.geometry.coordinates[0][0], lon: route.geometry.coordinates[0][1] }
         ghostCoords = { lat: route.geometry.coordinates[0][0], lon: route.geometry.coordinates[0][1] }
         let gXY = sMap.lonLatToXY(ghostCoords, "asPVector");
 
 =======
+=======
+>>>>>>> parent of 62616f4... Navigator updated
         let routeStart = { lat: route.geometry.coordinates[0][0], lon: route.geometry.coordinates[0][1] }
         let gXY = sMap.lonLatToXY(routeStart, "asPVector");
 >>>>>>> parent of 62616f4... Navigator updated
@@ -140,6 +143,7 @@ let globalP5 = new p5(sketch, 'sketchHolder')
 function setupInterval(millis) {
     updateInterval = setInterval(function() {
 <<<<<<< HEAD
+<<<<<<< HEAD
 
         // update ghost
         ghost.followRoute("", speed); // "", speed
@@ -154,6 +158,8 @@ function setupInterval(millis) {
             "gcoord": sMap.XYToLonLat(ghost.pos)
         });
 =======
+=======
+>>>>>>> parent of 62616f4... Navigator updated
             // update ghost
             ghost.followRoute("", 3); // "", speed
 
@@ -180,6 +186,9 @@ function setupInterval(millis) {
             GUI.ghost.textContent = "Time: " + Utils.getEllapsedTime() + ', Latitude: ' + sMap.XYToLonLat(ghost.pos).lat + '°, Longitude: ' + sMap.XYToLonLat(ghost.pos).lon + '°';
         },
         millis);
+<<<<<<< HEAD
+>>>>>>> parent of 62616f4... Navigator updated
+=======
 >>>>>>> parent of 62616f4... Navigator updated
 
 }
