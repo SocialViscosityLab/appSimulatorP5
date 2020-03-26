@@ -1,22 +1,20 @@
-button {
+button{
     height: 50px;
-    width: fit-content;
+    width: fit-content; 
     border: none;
     padding: 10px;
     margin-right: 10px;
     margin-top: 20px;
-}
-
+ }
+ 
 #sketchHolder {
-    position: absolute;
-    z-index: -100;
+    position : absolute;
+    z-index:-100;
 }
-
 #content {
     margin-top: 10%;
     color: white;
 }
-
 #help {
     font-size: large;
     color: white;

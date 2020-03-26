@@ -27,10 +27,10 @@ class Cyclist {
 
     show(renderer, ghost) {
         renderer.push();
-        this.vField.show(renderer, ghost.pos);
+        //this.vField.show(renderer, ghost.pos);
         renderer.stroke(0, 216, 255);
         renderer.fill(255, 0, 225);
-        renderer.ellipse(this.pos.x, this.pos.y, 20, 20);
+        renderer.ellipse(0, 0, 20, 20);
         renderer.pop();
     }
 

@@ -1,20 +1,21 @@
 class GCamera {
     constructor(_p5) {
         this.p5 = _p5;
-        this.cam = _p5.createCamera(0, 0, 0, 0, 0, 0, 0, 0, -1);
+        this.posX = 0;
+        this.posY = 0;
+        this.posZ = 50;
+        this.targetX = 0;
+        this.targetY = 0;
+        this.targetZ = 0;
+        this.camUPX = 0;
+        this.camUPY = 0;
+        this.camUPZ = -1;
+        this.cam = _p5.createCamera(this.posX, this.posY, this.posZ, 0, 0, 0, this.camUPX, this.camUPY, this.camuPZ);
     }
 
-    /******** SIMPLE CAMERA *********/
-
-    /** The simpliest mode to set a camera lookig at a target
-     * @param from p5.Vector with 3D coordinates
-     * @param target p5.Vector with 3D coordinates 
-     */
     fromLookingAt(from, target) {
         this.cam.camera(from.x, from.y, from.z, target.x, target.y, target.z, 0, 0, -1);
     }
-
-    /******** MOUSE CONTROLED CAMERA *********/
 
     /** Positions the camera around a cylinder looking at a target. By defult the target is 0,0,0. 
      * @param radiusToTarget The distance from the camera to the target
@@ -47,12 +48,7 @@ class GCamera {
         }
     }
 
-    /** Positions the camera at the X,Y,Z parameters and looks from that viewpoint around 
-     * @param _x x coordinate camera
-     * @param _y y coordinate camera
-     * @param _z z coordinate camera
-     * @param radiusToTarget distance to 3D point from canvas center
-     */
+    /** Positions the camera at the X,Y,Z parameters and looks from that viewpoint around  */
     semiOrbital_lookingFrom_mouse(_x, _y, _z, radiusToTarget) {
         // get mouse coord normalized
         let nMouse = this.getNormalizedMouse("centered");
@@ -69,12 +65,13 @@ class GCamera {
     /** The camera attached to the mouse moves around Z axis. 
      * Left right extremes flaten perspective. Target could be specified
      * @param how far is the camera from the origin 0,0,0
-     * @_target p5.Vector with the coords the camera looks at 
+     * @_target the coords the camera looks at 
      */
     semiOrbital_lookingAt_mouse(proximity, _target) {
         let nMouse = this.getNormalizedMouse("centered");
         let nVect = this.get3DVector(nMouse.x, nMouse.y)
         nVect.mult(proximity)
+            // this.cam.camera(nVect.x, nVect.y, nVect.z, this.targetX, this.targetY, this.targetZ, 0, 0, -1);
             // set values on camera
         if (_target) {
             this.cam.camera(nVect.x, nVect.y, nVect.z, _target.x, _target.y, _target.z, 0, 0, -1);
@@ -84,9 +81,9 @@ class GCamera {
         }
     }
 
-    /** Returns the mouse poisition normilized betwwen 0 and 1. 
+    /** Returns the mouse poisiotn normilized betwwen 0 and 1. 
      * If centered parameter is present the range is -1 and 1
-     * @param centered If true the range is -1 and 1
+     * @param centered Any object. If this parameter is present the range is -1 and 1
      * @return 2D instance of p5.Vector
      */
     getNormalizedMouse(centered) {
@@ -99,28 +96,29 @@ class GCamera {
         return mVector;
     }
 
-    /******** GYROSCOPE CONTROLED CAMERA *********/
+    /******** GYROSCOPE FUNCTIONS *********/
 
+    // settingRotationCamera(proximity) {
+
+    //     //helpText.innerHTML = "Rotation:"+this.p5.rotationZ+"<br>RotationReal:"+realAngle;
+
+
+    // }
 
     /** Positions the camera at the X,Y,Z parameters and looks from that viewpoint around  */
-    semiOrbital_lookingFrom_gyro(_x, _y, _z) {
-        let radiusToTarget = 100;
-        let oPosZ;
-
-        if (this.p5.rotationX < 40) {
-            oPosZ = 0;
-        } else if (this.p5.rotationX >= 40 && this.p5.rotationX < 90) {
-            oPosZ = this.p5.map(this.p5.rotationX, 40, 86, 0, 80)
-        } else if (this.p5.rotationX >= 86) {
-            oPosZ = 80;
+    semiOrbital_lookingFrom_gyro(_x, _y, _z, radiusToTarget) {
+        if (this.p5.rotationX < 10) {
+            radiusToTarget = 1;
+        } else if (this.p5.rotationX > 100) {
+            radiusToTarget = 400;
+        } else {
+            radiusToTarget = this.p5.map(this.p5.rotationX, 10, 100, 1, 400)
         }
-
-        let oPosX = this.p5.cos(this.p5.radians(-this.p5.rotationZ) + this.p5.HALF_PI) * radiusToTarget;
-        let oPosY = this.p5.sin(this.p5.radians(-this.p5.rotationZ) + this.p5.HALF_PI) * radiusToTarget;
-        this.p5.camera(_x, _y, _z, _x - oPosX, _y - oPosY, oPosZ, 0, 0, -1);
+        let oPosX = this.p5.cos(this.p5.radians(-this.p5.rotationZ)) * radiusToTarget;
+        let oPosY = this.p5.sin(this.p5.radians(-this.p5.rotationZ)) * radiusToTarget;
+        let camTargetZ = 10;
+        this.p5.camera(_x, _y, _z, oPosX, oPosY, camTargetZ, 0, 0, -1);
     }
-
-    /******** UTILITY FUNCTIONS ********
 
     /** Utility method. This method reduces the scale of the object 
      * if the xy coordinate proyection on the sphere falls infinite*/

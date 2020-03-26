@@ -1,6 +1,3 @@
-/**
- * Utilities availables as static functions of this class.
- */
 class Utils {
     static p5;
 
