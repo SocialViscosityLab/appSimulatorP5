@@ -1,6 +1,9 @@
 class Communication{
-  constructor(){
-    this.JourneyId = 0;
+  constructor(user_id){
+    this.user_id = user_id;
+    this.journeyId = 0;
+    this.sessionId = 0;
+    this.identified = false;
     this.getLastJourneyId();
 
   }
@@ -10,7 +13,7 @@ class Communication{
    * one in the sequence
    */
   getLastJourneyId(){
-    console.log("Getting Journey Id")
+    console.log("Getting Journey Id");
     let jId = 0;
     var journeys = db.collection('journeys').get().then(snapshot => {
       snapshot.forEach(doc => {
@@ -22,9 +25,27 @@ class Communication{
         }
       });
       this.journeyId = this.formatID(jId);
+      console.log("The journey ID is:");
       console.log(this.journeyId);
       this.listenToGhost(this.journeyId);
-    });
+      return db.collection('journeys').doc(this.journeyId).collection('sessions').get()
+    }).then(snapshot => {
+      let sId = 0;
+      snapshot.forEach(doc => {
+        let temp_sID = parseInt(doc.id);
+        if(temp_sID != null){
+          if (temp_sID > sId){
+            sId = temp_sID;
+          }
+        }
+      });
+      this.sessionId = this.formatID(sId+1);
+      console.log("The session ID is:");
+      console.log(this.sessionId);
+      this.addThisSession()
+      //return Promise.all(sessions_promises)
+
+    })
     return journeys;
   }
 
@@ -34,7 +55,6 @@ class Communication{
    * @param {String} journeyId 
    */
   listenToGhost(journeyId){
-    console.log("holi")
     var sessions = db.collection("journeys").doc(journeyId).collection("sessions").doc("00000")
     .onSnapshot(function(doc){
           let ghostCurrentPosition = doc.data().current_ghost_position;
@@ -46,6 +66,33 @@ class Communication{
   }
 
   /**
+   * Creates a reference of the session in the database
+   */
+  addThisSession(){
+    let time = new Date();
+    let startTime = time.getFullYear()+"/"+time.getMonth()+"/"+time.getDate()+" - "+time.getHours()+":"+time.getMinutes()+":"+time.getSeconds();
+    let metaData = {
+      id_user:this.user_id,
+      start_time:startTime
+    };
+    db.collection('journeys').doc(this.journeyId).collection('sessions').doc(this.sessionId).set(metaData);
+    console.log("metaData added");
+    this.identified = true;
+  }
+
+  /**
+   * Adds a new datapoint document with a specific id in a sepecific session from a specific journey
+   * @param {Integer} dpId 
+   * @param {JSON} dataPointDoc 
+   */
+  addNewDataPointInSession(dpId, dataPointDoc){
+    if(this.identified){
+      let dataPointId =  this.formatID(dpId);
+      db.collection('journeys').doc(this.journeyId).collection('sessions').doc(this.sessionId).update({current_position:dataPointDoc});
+      db.collection('journeys').doc(this.journeyId).collection('sessions').doc(this.sessionId).collection("data_points").doc(dataPointId).set(dataPointDoc);
+    }
+  }
+  /**
    * Format a number with the id format used on the database
    * @param {Integer} id 
    */
@@ -53,11 +100,6 @@ class Communication{
     let zeros = "00000";
     return  (zeros+id).slice(-zeros.length)
   }
-
-
-
-
-
 
 
 
@@ -177,110 +219,8 @@ class Communication{
 
 
   
-  /**
-   * Listen to a specific journey and returns any session that 
-   * presents a change in it
-   * @param {String} journeyId 
-   */
-  listenToJourenysSessions(journeyId){
-    var sessions = db.collection("journeys").doc(journeyId).collection("sessions")
-    .onSnapshot(function(docSnapShot) {
-      docSnapShot.forEach(function(doc){
-        if(doc.id !== "00000"){
-          let changingSession = doc.data();
-          journeyM.addRemoteCyclist(doc.id, changingSession);
-          return changingSession;
-        }
-      })
-    });
-    return sessions;
-  }
 
 
-  /**
-   * Sends a new rout with a specific Id to defined
-   * positionPoints to the database
-   * @param {String} id 
-   * @param {JSON} positionPoints 
-   */
-  addNewRoute(id, positionPoints){
-    for (var i = 0; i <= positionPoints.length; i++){
-      if (positionPoints[i] != undefined){
-        let zeros = "000";
-        let ppId = (zeros+i).slice(-zeros.length);
-        db.collection('routes').doc(id).collection('position_points').doc(ppId).set(positionPoints[i]);
-        db.collection('routes').doc(id).set({loop:false});
-
-      }
-    }
-  }
-
-
-  /**
-   * Switch the loop's value on a specific route
-   * @param {String} id 
-   * @param {Boolean} loop 
-   */
-  setRouteLoop(id, loop){
-    db.collection('routes').doc(id).set({loop:loop});
-  }
-
-
-  /**
-   * Sets a new journey on the database with a specific id and a 
-   * reference route
-   * @param {String} id 
-   * @param {String} refRouteId 
-   */
-  addNewJourney(id, refRouteId){
-    let refRoute = db.collection('routes').doc(refRouteId);
-    db.collection('journeys').doc(id).set({reference_route:refRoute});
-    console.log("new journey added");
-  }
-
-
-  /**
-   * Adds a new new Ghost's session on a specific journey
-   * @param {String} journeyId 
-   */
-  addNewGhostSession(jId){
-    let journeyId = ""+jId;
-    let time = new Date();
-    let startTime = time.getFullYear()+"/"+time.getMonth()+"/"+time.getDate()+" - "+time.getHours()+":"+time.getMinutes()+":"+time.getSeconds();
-    let metaData = {
-      id_user:"ghost",
-      start_time:startTime
-    };
-    db.collection('journeys').doc(journeyId).collection('sessions').doc("00000").set(metaData);
-    console.log("metaData added");
-  }
-
-
-  /**
-   * Adds a new datapoint document with a specific id in a sepecific session from a specific journey
-   * @param {String} jId 
-   * @param {String} sessionId 
-   * @param {Integer} dpId 
-   * @param {JSON} dataPointDoc 
-   */
-  addNewDataPointInSession(jId, sessionId, dpId, dataPointDoc){
-    let journeyId = ""+jId;
-    let dataPointId =  ""+dpId;
-    let zero_filled = '00000';
-    let filledDataPointId = (zero_filled+dataPointId).slice(-zero_filled.length);
-    db.collection('journeys').doc(journeyId).collection('sessions').doc(sessionId).collection("data_points").doc(filledDataPointId).set(dataPointDoc);
-  }
-
-
-  /**
-   * Update the current ghost position on the database from a specific journey
-   * @param {String} jId 
-   * @param {JSON} dataPointDoc 
-   */
-  updateCurrentGhostPosition(jId, dataPointDoc){
-    let journeyId = ""+jId;
-    db.collection('journeys').doc(journeyId).collection('sessions').doc("00000").update({current_ghost_position:dataPointDoc});
-  }
 
 
   /**

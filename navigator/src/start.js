@@ -46,7 +46,7 @@ function sketch(p5) {
 
 
     p5.setup = function() {
-        comm = new Communication();
+        comm = new Communication("sDFGHJKL");
       
         p5.createCanvas(p5.windowWidth, p5.windowHeight, p5.WEBGL)
 
@@ -155,16 +155,34 @@ function setupInterval(millis) {
         // update ghost
         //ghost.followRoute("", speed); // "", speed
         ghost.updatePosition(sMap.lonLatToXY(ghostCoords, "asPVector"));
+       
+        if(device.pos!= undefined){
+            // update cyclists
+            cyclist.updatePosition(sMap.lonLatToXY(device.pos));
+            
+            //manage registers of datapoints (for json and database)
+            let stamp = Utils.getEllapsedTime();
+            let coord = { "lat": device.pos.lat, "lon": device.pos.lon }
+            // store record
+            dataCoords.push({
+                "stamp": stamp,
+                "coord": coord,
+                "gcoord": sMap.XYToLonLat(ghost.pos)
+            });
+            //TODO: add acc and speed(?)
+            let tempDPID = dataCoords.length-1
+            let tempDP = {
+                'acceleration' : 0,
+                'latitude' : coord.lat,
+                'longitude' : coord.lon,
+                'speed' : 0,
+                'suggestion' : 0,
+                'time' : stamp
+                }
+            comm.addNewDataPointInSession(tempDPID, tempDP)
 
-        // update cyclists
-        cyclist.updatePosition(sMap.lonLatToXY(device.pos));
-
-        // store record
-        dataCoords.push({
-            "stamp": Utils.getEllapsedTime(),
-            "coord": { "lat": device.pos.lat, "lon": device.pos.lon },
-            "gcoord": sMap.XYToLonLat(ghost.pos)
-        });
+        }
+        
 
         // // update pGraphics
         sMap.show(pGraphics);
