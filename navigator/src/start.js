@@ -3,6 +3,7 @@
 // The ghost, cyclists and cyclists's device
 let ghost, cyclist, device;
 let ghostCoords;
+let ghost_loaded = false;
 
 let pGraphics;
 
@@ -31,7 +32,7 @@ function sketch(p5) {
         // route = p5.loadJSON('./routes/ikenberry.json');
         // limits = p5.loadJSON("./routes/ikenberryLimits.json");
         // p5.loadImage("./img/ikenberry1365.png", function(val) {
-        route = p5.loadJSON('./routes/urbanaExtendido.json')
+        //route = p5.loadJSON('./routes/urbanaExtendido.json')
         limits = p5.loadJSON("./routes/urbanaExtendidoLimits.json")
         p5.loadImage("./img/urbanaExtendido.png", function(val) {
             // **** MAP ****
@@ -42,12 +43,18 @@ function sketch(p5) {
             pGraphics = p5.createGraphics(sMap.image.width, sMap.image.height, p5.WEBGL);
         });
         myFont = p5.loadFont("./fonts/Roboto/Roboto-Medium.ttf")
+        comm = new Communication(generateID());
+        comm.getLastJourneyId().then( j => {
+            comm.getRoute(sMap).then( path => {
+                ghost = new Fantasma(Utils.p5, path[0].x, path[0].y);
+                ghost.AddRoute(path);
+                ghost_loaded = true;    
+            });
+        });
     }
 
 
-    p5.setup = function() {
-        comm = new Communication("sDFGHJKL");
-      
+    p5.setup = function() {      
         p5.createCanvas(p5.windowWidth, p5.windowHeight, p5.WEBGL)
 
         // *** UTILS ****
@@ -72,11 +79,12 @@ function sketch(p5) {
 
         // **** GHOST ****
         //let routeStart = { lat: route.geometry.coordinates[0][0], lon: route.geometry.coordinates[0][1] }
-        ghostCoords = { lat: route.geometry.coordinates[0][0], lon: route.geometry.coordinates[0][1] }
-        let gXY = sMap.lonLatToXY(ghostCoords, "asPVector");
-
-        ghost = new Fantasma(Utils.p5, gXY.x, gXY.y);
-        ghost.AddRoute(getRoute(route));
+     
+        //ghostCoords = { lat: route.geometry.coordinates[0][0], lon: route.geometry.coordinates[0][1] }
+        //let gXY = sMap.lonLatToXY(ghostCoords, "asPVector");
+        
+        //ghost = new Fantasma(Utils.p5, gXY.x, gXY.y);
+        //ghost.AddRoute(getRoute(route));
 
         // **** UPDATE INTERVAL ****
         // This interval controls the update pace of the entire APP except p5's draw() function
@@ -119,7 +127,9 @@ function sketch(p5) {
             // C spin mouse around position
             //camera1.semiOrbital_lookingFrom_mouse(cyclist.pos.x, cyclist.pos.y, 100, 100);
             // D Simpliest  
+            if(ghost_loaded){
             camera1.fromLookingAt(p5.createVector(cyclist.pos.x, cyclist.pos.y, 50), ghost.pos);
+         }
         } else {
             // CAMERA MOBILE
             camera1.semiOrbital_lookingFrom_gyro(cyclist.pos.x, cyclist.pos.y, 200);
@@ -127,8 +137,6 @@ function sketch(p5) {
 
         }
          
-        // camera1.showAxes();
-
         if (tracking) {
             p5.image(pGraphics, (-pGraphics.width / 2), (-pGraphics.height / 2));
         } else {
@@ -151,25 +159,23 @@ let globalP5 = new p5(sketch, 'sketchHolder');
 
 function setupInterval(millis) {
     updateInterval = setInterval(function() {
-
-        // update ghost
-        //ghost.followRoute("", speed); // "", speed
-        ghost.updatePosition(sMap.lonLatToXY(ghostCoords, "asPVector"));
-       
+        
         if(device.pos!= undefined){
             // update cyclists
             cyclist.updatePosition(sMap.lonLatToXY(device.pos));
             
             //manage registers of datapoints (for json and database)
             let stamp = Utils.getEllapsedTime();
-            let coord = { "lat": device.pos.lat, "lon": device.pos.lon }
-            // store record
-            dataCoords.push({
+            let coord = { "lat": device.pos.lat, "lon": device.pos.lon }      
+            if(ghost_loaded){
+                ghost.updatePosition(sMap.lonLatToXY(ghostCoords, "asPVector"));
+                // store record
+                dataCoords.push({
                 "stamp": stamp,
                 "coord": coord,
                 "gcoord": sMap.XYToLonLat(ghost.pos)
-            });
-            //TODO: add acc and speed(?)
+                });
+                            //TODO: add acc and speed(?)
             let tempDPID = dataCoords.length-1
             let tempDP = {
                 'acceleration' : 0,
@@ -181,20 +187,22 @@ function setupInterval(millis) {
                 }
             comm.addNewDataPointInSession(tempDPID, tempDP)
 
+            }
         }
         
-
-        // // update pGraphics
-        sMap.show(pGraphics);
-        ghost.show(pGraphics);
-        ghost.showRoute(pGraphics);
-        cyclist.show(pGraphics, ghost);
-
         // update device status on GUI
         GUI.status.textContent = device.status;
         GUI.latLon.textContent = "Time: " + Utils.getEllapsedTime() + ', Latitude: ' + device.pos.lat + '°, Longitude: ' + device.pos.lon + '°';
         GUI.latLon.href = ('https://www.openstreetmap.org/#map=18/' + device.pos.lat + "/" + device.pos.lon);
-        GUI.ghost.textContent = "Time: " + Utils.getEllapsedTime() + ', Latitude: ' + sMap.XYToLonLat(ghost.pos).lat + '°, Longitude: ' + sMap.XYToLonLat(ghost.pos).lon + '°';
+        // update ghost
+        if(ghost_loaded){
+            // // update pGraphics
+            sMap.show(pGraphics);
+            cyclist.show(pGraphics, ghost);
+            ghost.show(pGraphics);
+            ghost.showRoute(pGraphics);              
+            GUI.ghost.textContent = "Time: " + Utils.getEllapsedTime() + ', Latitude: ' + sMap.XYToLonLat(ghost.pos).lat + '°, Longitude: ' + sMap.XYToLonLat(ghost.pos).lon + '°';
+        }  
     }, millis);
 }
 
@@ -216,4 +224,8 @@ function getRoute(object) {
         tmp.push(tmp2);
     }
     return tmp;
+}
+
+function generateID() {
+    return (Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15));
 }
