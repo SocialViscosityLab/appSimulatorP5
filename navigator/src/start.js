@@ -54,7 +54,8 @@ function sketch(p5) {
     }
 
 
-    p5.setup = function() {      
+
+    p5.setup = function() {
         p5.createCanvas(p5.windowWidth, p5.windowHeight, p5.WEBGL)
 
         // *** UTILS ****
@@ -118,7 +119,7 @@ function sketch(p5) {
     p5.draw = function() {
         p5.background(205);
 
-         if (!isMobile) {
+        if (!isMobile) {
             // CAMERA MOUSE
             // A mouseX controls 360 spin around Z, mouseY controls above or below horizon
             // camera1.cylindrical_lookingAt_mouse(600);
@@ -136,7 +137,9 @@ function sketch(p5) {
             //camera1.fromLookingAt(p5.createVector(cyclist.pos.x, cyclist.pos.y, 250), ghost.pos);
 
         }
-         
+
+        // camera1.showAxes();
+
         if (tracking) {
             p5.image(pGraphics, (-pGraphics.width / 2), (-pGraphics.height / 2));
         } else {
@@ -159,11 +162,15 @@ let globalP5 = new p5(sketch, 'sketchHolder');
 
 function setupInterval(millis) {
     updateInterval = setInterval(function() {
-        
-        if(device.pos!= undefined){
+
+        // update ghost
+        //ghost.followRoute("", speed); // "", speed
+        ghost.updatePosition(sMap.lonLatToXY(ghostCoords, "asPVector"));
+
+        if (device.pos != undefined) {
             // update cyclists
             cyclist.updatePosition(sMap.lonLatToXY(device.pos));
-            
+
             //manage registers of datapoints (for json and database)
             let stamp = Utils.getEllapsedTime();
             let coord = { "lat": device.pos.lat, "lon": device.pos.lon }      
@@ -178,13 +185,13 @@ function setupInterval(millis) {
                             //TODO: add acc and speed(?)
             let tempDPID = dataCoords.length-1
             let tempDP = {
-                'acceleration' : 0,
-                'latitude' : coord.lat,
-                'longitude' : coord.lon,
-                'speed' : 0,
-                'suggestion' : 0,
-                'time' : stamp
-                }
+                'acceleration': 0,
+                'latitude': coord.lat,
+                'longitude': coord.lon,
+                'speed': 0,
+                'suggestion': 0,
+                'time': stamp
+            }
             comm.addNewDataPointInSession(tempDPID, tempDP)
 
             }
